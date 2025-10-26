@@ -1,14 +1,14 @@
-"""Super-simple AnswerTool aligned with the PaperQA distribution (Person D).
-- Map: handled by GatherTool upstream (inputs here are Evidence[]).
-- Ask (a priori): Background injected as plain text.
-- Reduce: Compose a cited answer or say "I cannot answer".
-Keep it tiny, deterministic, and dependency-free.
+"""AnswerTool implementation following PaperQA paper specification.
+- Ask LLM: Provides background information from pre-trained LLM
+- Answer LLM: Generates final answer with citations
+- Follows exact prompt format from the paper
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
+import re
 
-# Minimal schemas (standalone). Swap to your project's schemas if available.
+# Schemas matching the project structure
 @dataclass
 class Evidence:
     chunk_id: str
@@ -26,68 +26,143 @@ class Answer:
     text: str
     citations: List[str]
     confidence: float     # 0–1
-    
-ANSWER_PROMPT = (
-    "Write an answer (answer_length={answer_length}) for the question based on the provided context. "
-    "If insufficient, reply 'I cannot answer'. Cite sources as (AuthorYYYY). "
-    "The answer should be in the following format: "
-    "Answer: <answer> "
-    "Citations: <citations> "
-    "Confidence: <confidence> "
-    "Answer length: <answer_length> "
-    "Citations: <citations> "
-    "Confidence: <confidence> "
-    "Answer length: <answer_length> "
-)
+
+# Ask LLM prompt (from paper)
+ASK_PROMPT = "Do you know anything about this question?"
+
+# Answer LLM prompt (exact format from paper)
+ANSWER_PROMPT = """Write an answer (answer_length={answer_length}) for the question below based on the provided context. If the context provides insufficient information, reply ''I cannot answer''. For each part of your answer, indicate which sources most support it via valid citation markers at the end of sentences, like (Vaswani2017) or (Devlin2018). Answer in an unbiased, comprehensive, and scholarly tone. If the question is subjective, provide an opinionated answer in the concluding 1-2 sentences.
+
+IMPORTANT: You MUST include citations in the format (AuthorYYYY) for each claim you make. Use the citations provided in the context.
+
+Context:
+{context}
+
+Extra background information: {background}
+
+Question: {question}
+
+Answer:"""
 
 class AnswerTool:
-    """Reduce step: synthesize final answer from evidence + background.
-    Rules (paper-faithful, simplified):
-      - Use up to top_k evidence summaries (default 8).
-      - If not enough evidence OR low scores, return "I cannot answer".
-      - Otherwise write a concise, cited answer.
+    """AnswerTool following PaperQA paper specification.
+    
+    Implements the two-step process:
+    1. Ask LLM: Get background information from pre-trained LLM
+    2. Answer LLM: Generate final answer with citations
     """
 
-    def __init__(self, llm, min_evidence: int = 5, top_k: int = 8, min_avg_score: float = 6.5):
-        self.llm = llm
+    def __init__(self, ask_llm=None, answer_llm=None, answer_length: str = "medium", 
+                 min_evidence: int = 1, top_k: int = 8, min_avg_score: float = 6.5):
+        self.ask_llm = ask_llm
+        self.answer_llm = answer_llm
+        self.answer_length = answer_length
         self.min_evidence = min_evidence
         self.top_k = top_k
         self.min_avg_score = min_avg_score
 
-    def generate(self, question: str, evidences: List[Evidence], background: Background) -> Answer:
+    def _get_ask_llm_response(self, question: str) -> str:
+        """Get background information from ask LLM."""
+        if self.ask_llm is None:
+            # Fallback: return empty background
+            return ""
+        
+        try:
+            # Call ask LLM with the question
+            response = self.ask_llm.generate(
+                prompt=ASK_PROMPT,
+                question=question,
+                max_tokens=100,
+                temperature=0.1
+            )
+            return response.strip()
+        except Exception as e:
+            print(f"Ask LLM error: {e}")
+            return ""
+
+    def _get_answer_llm_response(self, question: str, context: str, background: str) -> str:
+        """Get final answer from answer LLM."""
+        if self.answer_llm is None:
+            # Fallback: return simple response
+            return "I cannot answer."
+        
+        try:
+            # Format the prompt according to paper specification
+            prompt = ANSWER_PROMPT.format(
+                answer_length=self.answer_length,
+                context=context,
+                background=background,
+                question=question
+            )
+            
+            response = self.answer_llm.generate(
+                prompt=prompt,
+                max_tokens=500,
+                temperature=0.3
+            )
+            return response.strip()
+        except Exception as e:
+            print(f"Answer LLM error: {e}")
+            return "I cannot answer."
+
+    def _extract_citations(self, text: str) -> List[str]:
+        """Extract citations from answer text."""
+        # Find citations in format (AuthorYYYY) - more flexible pattern
+        citation_patterns = [
+            r'\([A-Za-z]+\d{4}\)',  # (AuthorYYYY)
+            r'\([A-Za-z]+\s+\d{4}\)',  # (Author YYYY)
+            r'\[[A-Za-z]+\d{4}\]',  # [AuthorYYYY]
+            r'\[[A-Za-z]+\s+\d{4}\]',  # [Author YYYY]
+        ]
+        
+        citations = []
+        for pattern in citation_patterns:
+            matches = re.findall(pattern, text)
+            citations.extend(matches)
+        
+        # Clean up citations and remove duplicates
+        cleaned_citations = []
+        for citation in citations:
+            # Remove brackets/parentheses and clean up
+            clean_citation = citation.strip('()[]')
+            if clean_citation and clean_citation not in cleaned_citations:
+                cleaned_citations.append(f"({clean_citation})")
+        
+        return cleaned_citations
+
+    def generate(self, question: str, evidences: List[Evidence], background: Optional[Background] = None) -> Answer:
+        """Generate answer following PaperQA specification."""
+        
+        # Step 1: Check if we have sufficient evidence
         if not evidences:
             return Answer(text="I cannot answer.", citations=[], confidence=0.0)
 
-        # sort by score desc and take top_k
-        ev = sorted(evidences, key=lambda e: e.score, reverse=True)[: self.top_k]
+        # Sort by score and take top_k
+        ev = sorted(evidences, key=lambda e: e.score, reverse=True)[:self.top_k]
         avg_score = sum(e.score for e in ev) / len(ev)
 
-        # Insufficient evidence guardrails (paper requires "I cannot answer" fallback)
+        # Check evidence quality
         if len(ev) < self.min_evidence or avg_score < self.min_avg_score:
             return Answer(text="I cannot answer.", citations=[], confidence=0.0)
 
-        # Compose a compact answer: background (optional) + 2–3 fused points from evidence
-        bullets = []
-        for e in ev[:3]:  # keep it short
-            bullets.append(f"- {e.summary.strip()} {e.citation}")
+        # Step 2: Get background from ask LLM
+        ask_background = self._get_ask_llm_response(question)
+        
+        # Combine with provided background if available
+        if background and background.background_text:
+            ask_background = f"{ask_background}\n{background.background_text}".strip()
 
-        bg = background.background_text.strip()
-        parts = []
-        if bg:
-            parts.append(f"Background: {bg}")
-        parts.append("Key points:\n" + "\n".join(bullets))
-        parts.append("Conclusion: Based on the retrieved evidence above, this is the best-supported answer.")
-        text = "\n\n".join(parts)
+        # Step 3: Build context from evidence with clear citation format
+        context_parts = []
+        for i, e in enumerate(ev, 1):
+            context_parts.append(f"Source {i}: {e.summary} {e.citation}")
+        context = "\n".join(context_parts)
 
-        # Citations: unique order-preserving
-        seen = set()
-        citations = []
-        for e in ev:
-            if e.citation and e.citation not in seen:
-                citations.append(e.citation)
-                seen.add(e.citation)
+        # Step 4: Get answer from answer LLM
+        answer_text = self._get_answer_llm_response(question, context, ask_background)
+        
+        # Step 5: Extract citations and calculate confidence
+        citations = self._extract_citations(answer_text)
+        confidence = min(0.99, max(0.0, avg_score / 10.0))
 
-        # Confidence: normalized mean relevance (simple, transparent)
-        confidence = min(0.99, max(0.0, sum(e.score for e in ev) / (10.0 * len(ev))))
-
-        return Answer(text=text, citations=citations, confidence=confidence)
+        return Answer(text=answer_text, citations=citations, confidence=confidence)
