@@ -1,168 +1,147 @@
-"""AnswerTool implementation following PaperQA paper specification.
-- Ask LLM: Provides background information from pre-trained LLM
-- Answer LLM: Generates final answer with citations
-- Follows exact prompt format from the paper
+"""
+Person D — Answer LLM (reduce + citations)
+Generates final answers based on evidence and background.
 """
 
-from dataclasses import dataclass
-from typing import List, Optional
-import re
+import ast
+from typing import List, Tuple, Optional
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from langchain.schema import Document
 
-# Schemas matching the project structure
-@dataclass
-class Evidence:
-    chunk_id: str
-    summary: str
-    score: float          # 1–10 relevance
-    citation: str         # e.g., "(Smith 2022)"
+from schemas import Evidence, Background, Answer, Config
+from settings import Settings
 
-@dataclass
-class Background:
-    question: str
-    background_text: str  # ~50 words
 
-@dataclass
-class Answer:
-    text: str
-    citations: List[str]
-    confidence: float     # 0–1
-
-# Ask LLM prompt (from paper)
-ASK_PROMPT = "Do you know anything about this question?"
-
-# Answer LLM prompt (exact format from paper)
-ANSWER_PROMPT = """Write an answer (answer_length={answer_length}) for the question below based on the provided context. If the context provides insufficient information, reply ''I cannot answer''. For each part of your answer, indicate which sources most support it via valid citation markers at the end of sentences, like (Vaswani2017) or (Devlin2018). Answer in an unbiased, comprehensive, and scholarly tone. If the question is subjective, provide an opinionated answer in the concluding 1-2 sentences.
-
-IMPORTANT: You MUST include citations in the format (AuthorYYYY) for each claim you make. Use the citations provided in the context.
-
-Context:
-{context}
-
-Extra background information: {background}
-
-Question: {question}
-
-Answer:"""
-
-class AnswerTool:
-    """AnswerTool following PaperQA paper specification.
+class AnswerLLMTool:
+    """Tool for generating final answers using LLM."""
     
-    Implements the two-step process:
-    1. Ask LLM: Get background information from pre-trained LLM
-    2. Answer LLM: Generate final answer with citations
-    """
+    def __init__(self, config: Optional[Config] = None):
+        self.config = config or Settings.get_config()
+        self.tokenizer = None
+        self.model = None
+        self._initialize_model()
+    
+    def _initialize_model(self) -> None:
+        """Initialize the LLM model and tokenizer."""
+        self.tokenizer = AutoTokenizer.from_pretrained(Settings.MODEL_NAME)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            Settings.MODEL_NAME, 
+            dtype='auto', 
+            device_map='auto'
+        )
+    
+    def answer(self, evidence_list: List[Evidence], background: Background, 
+              documents: List[Document], question: str, 
+              if_debug: bool = False) -> Answer:
+        """
+        Generate final answer based on evidence and background.
+        
+        Args:
+            evidence_list: List of Evidence objects
+            background: Background information
+            documents: List of Document objects for context
+            question: Original question
+            if_debug: Whether to print debug information
+            
+        Returns:
+            Answer object with answers, sources, and confidence
+        """
+        # Build context from top evidence
+        context = ""
+        sources = []
+        
+        for i, evidence in enumerate(evidence_list[:self.config.top_chunk_num]):
+            if i < len(documents):
+                doc = documents[i]
+                citation = f"Source: {doc.metadata.get('source', 'Unknown')}, Page {str(doc.metadata.get('page', 'Unknown'))}"
+                context += f"\n\n{citation}\n" + doc.page_content
+                sources.append(citation)
+        
+        answer_prompt = Settings.SYSTEM_PROMPT_LLM + f"""
+        Write an answer (answer_length={self.config.answer_length}) for the question below based on the provided context. If the context provides insufficient information, reply 'I cannot answer'. For each part of your answer, indicate which sources most support it via valid citation markers at the end of sentences. Answer in an unbiased, comprehensive, and scholarly tone. If the question is subjective, provide an opinionated answer in the concluding 1-2 sentences.
+        Answer in the following format:
+            {{
+                "Answers": [Select multiple-choice options as answers],
+                "Sources": [Should be a list of sources, remain the format],
+                "Confidence": [0.0-1.0]
+            }}
 
-    def __init__(self, ask_llm=None, answer_llm=None, answer_length: str = "medium", 
-                 min_evidence: int = 1, top_k: int = 8, min_avg_score: float = 6.5):
-        self.ask_llm = ask_llm
-        self.answer_llm = answer_llm
-        self.answer_length = answer_length
-        self.min_evidence = min_evidence
-        self.top_k = top_k
-        self.min_avg_score = min_avg_score
+        Context: {context}
 
-    def _get_ask_llm_response(self, question: str) -> str:
-        """Get background information from ask LLM."""
-        if self.ask_llm is None:
-            # Fallback: return empty background
-            return ""
+        Extra background information (might be wrong): {background.background_text}
+
+        Question: {question}
+
+        Answer:
+        """
+
+        messages = [{"role": "user", "content": answer_prompt}]
+
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            Temperature=self.config.temperature,
+            TopP=self.config.top_p,
+            TopK=self.config.top_k,
+            MinP=self.config.min_p,
+            presence_penalty=self.config.presence_penalty,
+            add_generation_prompt=True,
+            enable_thinking=True
+        )
+        model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
+        
+        # Generate response
+        generated_ids = self.model.generate(
+            **model_inputs,
+            max_new_tokens=Settings.MAX_NEW_TOKENS,
+        )
+        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+        
+        # Parse thinking content
+        try:
+            # Find </think> token (151668)
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+        
+        if if_debug:
+            print("Answer thinking content:\n", thinking_content)
+            print("Answer content:\n", content)
         
         try:
-            # Call ask LLM with the question
-            response = self.ask_llm.generate(
-                prompt=ASK_PROMPT,
-                question=question,
-                max_tokens=100,
-                temperature=0.1
-            )
-            return response.strip()
-        except Exception as e:
-            print(f"Ask LLM error: {e}")
-            return ""
-
-    def _get_answer_llm_response(self, question: str, context: str, background: str) -> str:
-        """Get final answer from answer LLM."""
-        if self.answer_llm is None:
-            # Fallback: return simple response
-            return "I cannot answer."
-        
-        try:
-            # Format the prompt according to paper specification
-            prompt = ANSWER_PROMPT.format(
-                answer_length=self.answer_length,
-                context=context,
-                background=background,
-                question=question
+            # Parse JSON response
+            content_json = ast.literal_eval(content)
+            answers = content_json.get("Answers", [])
+            answer_sources = content_json.get("Sources", sources)
+            confidence = content_json.get("Confidence", 0.0)
+            
+            return Answer(
+                answers=answers,
+                sources=answer_sources,
+                confidence=confidence
             )
             
-            response = self.answer_llm.generate(
-                prompt=prompt,
-                max_tokens=500,
-                temperature=0.3
+        except (ValueError, SyntaxError) as e:
+            if if_debug:
+                print(f"Error parsing answer response: {e}")
+            
+            # Fallback response
+            return Answer(
+                answers=["I cannot answer"],
+                sources=[],
+                confidence=0.0
             )
-            return response.strip()
-        except Exception as e:
-            print(f"Answer LLM error: {e}")
-            return "I cannot answer."
 
-    def _extract_citations(self, text: str) -> List[str]:
-        """Extract citations from answer text."""
-        # Find citations in format (AuthorYYYY) - more flexible pattern
-        citation_patterns = [
-            r'\([A-Za-z]+\d{4}\)',  # (AuthorYYYY)
-            r'\([A-Za-z]+\s+\d{4}\)',  # (Author YYYY)
-            r'\[[A-Za-z]+\d{4}\]',  # [AuthorYYYY]
-            r'\[[A-Za-z]+\s+\d{4}\]',  # [Author YYYY]
-        ]
-        
-        citations = []
-        for pattern in citation_patterns:
-            matches = re.findall(pattern, text)
-            citations.extend(matches)
-        
-        # Clean up citations and remove duplicates
-        cleaned_citations = []
-        for citation in citations:
-            # Remove brackets/parentheses and clean up
-            clean_citation = citation.strip('()[]')
-            if clean_citation and clean_citation not in cleaned_citations:
-                cleaned_citations.append(f"({clean_citation})")
-        
-        return cleaned_citations
 
-    def generate(self, question: str, evidences: List[Evidence], background: Optional[Background] = None) -> Answer:
-        """Generate answer following PaperQA specification."""
-        
-        # Step 1: Check if we have sufficient evidence
-        if not evidences:
-            return Answer(text="I cannot answer.", citations=[], confidence=0.0)
-
-        # Sort by score and take top_k
-        ev = sorted(evidences, key=lambda e: e.score, reverse=True)[:self.top_k]
-        avg_score = sum(e.score for e in ev) / len(ev)
-
-        # Check evidence quality
-        if len(ev) < self.min_evidence or avg_score < self.min_avg_score:
-            return Answer(text="I cannot answer.", citations=[], confidence=0.0)
-
-        # Step 2: Get background from ask LLM
-        ask_background = self._get_ask_llm_response(question)
-        
-        # Combine with provided background if available
-        if background and background.background_text:
-            ask_background = f"{ask_background}\n{background.background_text}".strip()
-
-        # Step 3: Build context from evidence with clear citation format
-        context_parts = []
-        for i, e in enumerate(ev, 1):
-            context_parts.append(f"Source {i}: {e.summary} {e.citation}")
-        context = "\n".join(context_parts)
-
-        # Step 4: Get answer from answer LLM
-        answer_text = self._get_answer_llm_response(question, context, ask_background)
-        
-        # Step 5: Extract citations and calculate confidence
-        citations = self._extract_citations(answer_text)
-        confidence = min(0.99, max(0.0, avg_score / 10.0))
-
-        return Answer(text=answer_text, citations=citations, confidence=confidence)
+# # How to use
+# config = Settings.get_config()
+# answer_tool = AnswerLLMTool(config)
+# answer = answer_tool.answer(
+#             evidence_list, 
+#             background, 
+#             documents, 
+#             question
+#         )
