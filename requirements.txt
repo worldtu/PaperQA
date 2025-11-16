@@ -30,3 +30,9 @@ pytest>=8.1.1
 #   Linux/CPU:    pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
 #   macOS (MPS):  pip install torch==2.4.0
 #   CUDA 12.1:    pip install torch==2.4.0 torchvision --index-url https://download.pytorch.org/whl/cu121
+
+# --- SearchTool dependencies ---
+arxiv
+requests
+pymupdf
+nltk

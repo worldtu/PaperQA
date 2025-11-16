@@ -1,6 +1,22 @@
 from typing import List, Optional, Dict, Any
+from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
 
+@dataclass
+class SearchHit:
+    source: str                 # scholar|arxiv|pubmed|pmc|openaccess
+    paper_id: str               # doi|arxiv:YYYY.NNNNN|pmid|pmcid
+    title: str
+    year: Optional[int] = None
+    urls: Dict[str, str] = field(default_factory=dict)  # {"pdf": "...", "html": "..."}
+
+@dataclass
+class Chunk:
+    paper_id: str
+    chunk_id: str
+    start: int
+    end: int
+    text: str
 
 class SearchResult(BaseModel):
     """Search result from Person A (Search Tool) to Person B (Gather Evidence)."""
