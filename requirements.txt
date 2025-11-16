@@ -24,6 +24,7 @@ pyserini==0.40.0    # requires Java 11+ installed
 
 # Testing
 pytest>=8.1.1
+tqdm>=4.66.0
 
 # --- IMPORTANT ---
 # Install PyTorch separately for your platform BEFORE installing the above:

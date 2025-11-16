@@ -4,12 +4,15 @@ Generates final answers based on evidence and background.
 """
 
 import ast
+import logging
 from typing import List, Tuple, Optional
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from langchain.schema import Document
+from langchain_core.documents import Document
 
 from schemas import Evidence, Background, Answer, Config
 from settings import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class AnswerLLMTool:
@@ -50,7 +53,7 @@ class AnswerLLMTool:
         context = ""
         sources = []
         
-        for i, evidence in enumerate(evidence_list[:self.config.top_chunk_num]):
+        for i, evidence in enumerate[Evidence](evidence_list[:self.config.top_chunk_num]):
             if i < len(documents):
                 doc = documents[i]
                 citation = f"Source: {doc.metadata.get('source', 'Unknown')}, Page {str(doc.metadata.get('page', 'Unknown'))}"
@@ -80,13 +83,7 @@ class AnswerLLMTool:
         text = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,
-            Temperature=self.config.temperature,
-            TopP=self.config.top_p,
-            TopK=self.config.top_k,
-            MinP=self.config.min_p,
-            presence_penalty=self.config.presence_penalty,
-            add_generation_prompt=True,
-            enable_thinking=True
+            add_generation_prompt=True
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
         
@@ -94,26 +91,39 @@ class AnswerLLMTool:
         generated_ids = self.model.generate(
             **model_inputs,
             max_new_tokens=Settings.MAX_NEW_TOKENS,
+            temperature=self.config.temperature,
+            top_p=self.config.top_p,
+            top_k=self.config.top_k,
+            min_p=self.config.min_p,
         )
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
         
         # Parse thinking content
         try:
-            # Find </think> token (151668)
-            index = len(output_ids) - output_ids[::-1].index(151668)
+            # Find </think> token (151668) - last occurrence from the end
+            reversed_index = output_ids[::-1].index(151668)
+            index = len(output_ids) - 1 - reversed_index
         except ValueError:
             index = 0
 
-        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip()
+        # Skip the </think> token itself (index + 1)
+        content = self.tokenizer.decode(output_ids[index + 1:], skip_special_tokens=True).strip()
         
         if if_debug:
-            print("Answer thinking content:\n", thinking_content)
-            print("Answer content:\n", content)
+            logger.debug("Answer thinking content:\n" + thinking_content)
+            logger.debug("Answer content:\n" + content)
+            logger.debug(f"Content length: {len(content)}")
+            logger.debug(f"Content repr: {repr(content[:100])}")
         
         try:
-            # Parse JSON response
-            content_json = ast.literal_eval(content)
+            import json
+            # Parse JSON response - try json.loads first, then ast.literal_eval as fallback
+            try:
+                content_json = json.loads(content)
+            except (ValueError, json.JSONDecodeError):
+                content_json = ast.literal_eval(content)
+            
             answers = content_json.get("Answers", [])
             answer_sources = content_json.get("Sources", sources)
             confidence = content_json.get("Confidence", 0.0)
@@ -124,9 +134,9 @@ class AnswerLLMTool:
                 confidence=confidence
             )
             
-        except (ValueError, SyntaxError) as e:
+        except (ValueError, SyntaxError, Exception) as e:
             if if_debug:
-                print(f"Error parsing answer response: {e}")
+                logger.debug(f"Error parsing answer response: {e}")
             
             # Fallback response
             return Answer(

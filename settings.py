@@ -5,7 +5,7 @@ Contains model names, batch sizes, MMR parameters, and thresholds.
 
 import os
 from typing import Dict, Any
-from .schemas import Config
+from schemas import Config
 
 
 class Settings:
