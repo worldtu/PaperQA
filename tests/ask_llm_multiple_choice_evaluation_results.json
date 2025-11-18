@@ -1,0 +1,1935 @@
+{
+  "summary": {
+    "total": 80,
+    "correct": 61,
+    "partial": 5,
+    "incorrect": 14,
+    "accuracy": 0.7625,
+    "avg_precision": 0.8104166666666666,
+    "avg_recall": 0.80625,
+    "avg_f1": 0.8020833333333333,
+    "avg_background_confidence": 0.7537500000000001
+  },
+  "results": [
+    {
+      "question_no": "1",
+      "question": "What key contribution does the Video-MME benchmark introduce for evaluating multimodal LLMs?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "A comprehensive video benchmark (900 videos, 254 hours) for evaluating multimodal LLMs on video understanding tasks"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "A comprehensive video benchmark (900 videos, 254 hours) for evaluating multimodal LLMs on video understanding tasks"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Multimodal Large Language Models (MLLMs) are AI models that can process and understand both text and visual information (images or videos). Evaluating their performance requires benchmarks that assess their ability to reason and answer questions based on multimodal inputs. Existing benchmarks often have limitations in complexity or scope.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "2",
+      "question": "What makes the TRELLIS model distinct in 3D generation research?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Introduces Structured Latent ( SLAT ) grids for encoding 3D geometry and appearance, enabling decoding into multiple 3D formats"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Introduces Structured Latent ( SLAT ) grids for encoding 3D geometry and appearance, enabling decoding into multiple 3D formats"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Biological systems rely on DNA, transcribed into RNA, then translated into proteins. Proteins, the workhorses of the cell, fold into complex 3D structures dictated by their amino acid sequence and interactions, determining their function. Understanding these structures is crucial for comprehending biological processes.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "3",
+      "question": "What technique was found to most improve multimodal large language models’ performance on spatial reasoning tasks?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Forcing models to generate explicit spatial maps during reasoning to improve spatial memory and accuracy"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "The technique that most improved multimodal large language models' performance on spatial reasoning tasks was **incorporating spatial tokens and spatial-aware attention mechanisms.** This allowed models to explicitly represent and process spatial relationships between objects in images, improving their understanding of spatial concepts.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "4",
+      "question": "How can a single model achieve both image understanding and generation effectively?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "By decoupling two visual encoders within a unified Transformer — one for understanding and one for generation — to resolve granularity conflicts"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "By decoupling two visual encoders within a unified Transformer — one for understanding and one for generation — to resolve granularity conflicts"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Biological brains excel at both perception and action. Sensory input is processed through hierarchical neural networks, extracting features and forming representations. These representations then guide motor outputs, demonstrating a unified system for understanding and generating behavior.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "5",
+      "question": "What is the main innovation of the OmniGen framework for image generation?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Unifies multiple image generation tasks — text-to-image, editing, subject variation — in one diffusion-based model controlled by natural language instructions"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Unifies multiple image generation tasks — text-to-image, editing, subject variation — in one diffusion-based model controlled by natural language instructions"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Image generation models typically rely on single latent spaces. OmniGen innovates by utilizing **multiple, disentangled latent spaces**, each controlling distinct image attributes like shape, texture, and color. This allows for more precise and independent manipulation of these features during image synthesis.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "6",
+      "question": "What design feature enables a vision backbone to capture both local and global spatial dependencies efficiently?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Combining state-space Mamba layers with Transformer attention blocks to model long-range context"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Combining state-space Mamba layers with Transformer attention blocks to model long-range context"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Vision backbones are neural networks that extract visual features from images. Efficiently capturing both local (nearby pixels) and global (distant pixels) spatial relationships is crucial for image understanding tasks like object detection and segmentation.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "7",
+      "question": "How does StreamingT2V maintain temporal consistency when generating long videos from text?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Through short-term and long-term memory modules that preserve continuity and appearance across video segments"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Through short-term and long-term memory modules that preserve continuity and appearance across video segments"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Video generation models often struggle with temporal consistency. Frames can flicker or exhibit abrupt changes due to independent generation. Maintaining coherence requires mechanisms to ensure smooth transitions and consistent object identities across the video sequence.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "8",
+      "question": "What problem does a diffusion-based video-to-depth approach solve compared to standard depth-from-video methods?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Generates temporally consistent depth maps for long videos without using camera poses or optical flow supervision"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "Standard depth-from-video methods rely on geometric cues like stereo or structure-from-motion. Diffusion-based video-to-depth leverages learned priors from extensive image/video datasets. This allows generating depth even with textureless regions or ambiguous geometry, where traditional methods struggle, by \"hallucinating\" plausible depth maps.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "9",
+      "question": "What is the central idea behind the VideoTree framework for LLM video reasoning?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Construct a hierarchical tree of key frames that selectively refines important video segments for efficient reasoning"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Construct a hierarchical tree of key frames that selectively refines important video segments for efficient reasoning"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Large Language Models (LLMs) struggle with long videos due to computational limitations. VideoTree is a framework designed to improve LLM video reasoning by hierarchically summarizing video content into a tree structure. This allows LLMs to efficiently process and reason about long videos by focusing on relevant information.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "10",
+      "question": "What conclusion did MambaOut draw about the usefulness of the Mamba state-space component in vision tasks?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "The state-space component adds little benefit for image classification, and removing it ( MambaOut ) improves accuracy and efficiency"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "The state-space component adds little benefit for image classification, and removing it ( MambaOut ) improves accuracy and efficiency"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Mamba is a state-space model architecture gaining traction as an alternative to Transformers, particularly for sequence modeling. Its selective state space allows it to focus on relevant information within long sequences. Researchers are exploring its potential in various domains, including computer vision.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "11",
+      "question": "How can a multimodal model resolve the conflict between visual-understanding and visual-generation objectives?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "It decouples visual encoding into separate pathways for understanding and generation while using a unified transformer architecture."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "It decouples visual encoding into separate pathways for understanding and generation while using a unified transformer architecture."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Vision relies on specialized brain regions for processing visual input (perception) and generating visual imagery (imagination). Perception involves feature extraction and object recognition, while generation involves assembling features into coherent scenes. These processes utilize distinct but interconnected neural pathways and mechanisms.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "12",
+      "question": "What is the central strategy behind the NVILA family to achieve both high accuracy and efficiency in vision-language tasks?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "A 'scale-then-compress' approach: first scale spatial/temporal resolution, then compress visual tokens to improve efficiency while preserving accuracy."
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "NVILA (Neighborhood-based Vision-Language Alignment) models focus on improving vision-language understanding. They aim for efficient, accurate cross-modal alignment by leveraging local neighborhood information in both visual and textual representations, reducing computational complexity compared to global attention mechanisms.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "13",
+      "question": "What representation does the TRELLIS model introduce, and what benefit does it provide?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Structured Latent (SLAT) grids encoding geometry and appearance, enabling decoding into radiance fields, point clouds, or meshes."
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "TRELLIS models, common in speech recognition, utilize **trellis diagrams** to represent all possible sequences of hidden states (e.g., phonemes) for an observation. This allows efficient decoding via algorithms like Viterbi, finding the most probable state sequence given the input, improving accuracy and reducing computational cost.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "14",
+      "question": "In WonderWorld, what enables near real-time 3D scene generation from a single image?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "The FLAGS (Fast Layered Gaussian Surfels) representation enables rapid 3D scene generation from a single image."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "The FLAGS (Fast Layered Gaussian Surfels) representation enables rapid 3D scene generation from a single image."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Biological vision relies on the eye's retina capturing light, converting it to electrical signals. These signals travel via the optic nerve to the brain's visual cortex. Neural networks process this information, enabling depth perception and scene understanding through complex algorithms and prior experience.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "15",
+      "question": "What is the key idea behind MoSca for reconstructing moving scenes?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Lifts casual video into a 4D motion scaffold and uses Gaussian splatting to fuse geometry, appearance and motion for dynamic scene reconstruction."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Lifts casual video into a 4D motion scaffold and uses Gaussian splatting to fuse geometry, appearance and motion for dynamic scene reconstruction."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Reconstructing 3D moving scenes from videos is challenging due to occlusions and dynamic elements. Traditional methods struggle with non-rigid motion. MoSca (Motion-aware Scene Completion and Appearance) addresses this by jointly estimating scene geometry, motion, and appearance, enabling more accurate and complete reconstructions.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "16",
+      "question": "How does the CUT3R framework build scene models over time?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Maintains a persistent 3D state updated with each new frame and outputs a dense point-map in a common coordinate system."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Maintains a persistent 3D state updated with each new frame and outputs a dense point-map in a common coordinate system."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "CUT3R likely employs techniques like Simultaneous Localization and Mapping (SLAM) or Structure from Motion (SfM). It integrates visual and potentially inertial sensor data to estimate camera pose and build a 3D representation of the environment incrementally. Bundle adjustment is a common optimization step.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "17",
+      "question": "What enables Video-XL to handle hour-long videos efficiently?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Introduces Visual Summarization Tokens (VSTs) that compress chunks of frames into key-value embeddings for efficient processing."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Introduces Visual Summarization Tokens (VSTs) that compress chunks of frames into key-value embeddings for efficient processing."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Video-XL is a hypothetical or real advanced video processing or streaming technology. It likely employs techniques like optimized codecs, distributed processing, adaptive bitrate streaming, and efficient content delivery networks to manage large video files and ensure smooth playback.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "18",
+      "question": "What is the main contribution of Molmo and PixMo to open vision-language model research?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Release open-weight VLMs trained on PixMo, a fully open dataset of caption, Q&A, and pointing data collected without closed-model outputs, achieving state-of-the-art open-source performance."
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Release open-weight VLMs trained on PixMo, a fully open dataset of caption, Q&A, and pointing data collected without closed-model outputs, achieving state-of-the-art open-source performance."
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Vision-language models (VLMs) are typically trained with large datasets using contrastive learning or generative modeling. They learn to align image and text embeddings, enabling tasks like image captioning and visual question answering. Standard practice involves pre-training on web-scraped data and fine-tuning on specific benchmarks.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "19",
+      "question": "What makes FlowEdit distinct among text-based image-editing methods?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "It is an inversion-free method that uses a flow-model-based ODE to directly map source image distributions to target text distributions for editing."
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "FlowEdit leverages optical flow estimation to understand pixel correspondence between source and target images. It then warps and blends the source image based on user edits applied to the target, enabling localized and realistic image manipulation via text prompts. This differs from global editing or diffusion-based methods.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "20",
+      "question": "What mechanism allows StreamingT2V: Consistent, Dynamic, and Extendable Long Video Generation from Text to extend generated videos to minute-scale while preserving consistency?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Employs short-term memory for chunk transitions and long-term memory for appearance preservation, enabling smooth extension to arbitrary length"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Employs short-term memory for chunk transitions and long-term memory for appearance preservation, enabling smooth extension to arbitrary length"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Video generation models often struggle with temporal consistency. Key components include generative networks, attention mechanisms, and latent representations. Maintaining coherence across long sequences requires mechanisms to manage information flow and prevent drift in visual features over time.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "21",
+      "question": "According to the study, how does GenAI affect new venture launches in categories with relatively high GenAI usage?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "The number of new venture launches increased and median time to launch decreased"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "The number of new venture launches increased and median time to launch decreased"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Generative AI (GenAI) is rapidly evolving, impacting various industries. Its ability to automate tasks, generate content, and analyze data has implications for entrepreneurship. New venture creation is particularly susceptible to GenAI's influence, potentially altering launch strategies and competitive landscapes.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "22",
+      "question": "What trend do the authors report about the “citation dividend” of review papers in the GenAI era?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "It is declining"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "Review papers synthesize existing research on a topic. They are often highly cited, acting as valuable resources for researchers seeking an overview of a field. The \"citation dividend\" refers to the high number of citations these papers typically receive.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "23",
+      "question": "What is the paper’s central trade-off regarding data governance and GenAI in labor markets?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Information assurance vs. AI intelligence (learning capacity/predictive accuracy)"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Information assurance vs. AI intelligence (learning capacity/predictive accuracy)"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "GenAI, powered by neural networks, learns patterns from vast datasets. These algorithms generate novel outputs, impacting tasks previously requiring human intelligence. Data governance dictates data collection, storage, and usage policies, influencing GenAI's training and subsequent performance in labor market applications.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "24",
+      "question": "How does prompt English proficiency affect code correctness in LLM-assisted software tasks?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Higher-proficiency prompts yielded more correct code across all models"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Higher-proficiency prompts yielded more correct code across all models"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "LLM-assisted software development uses large language models to generate or improve code based on prompts. Prompt quality significantly impacts the LLM's output. English proficiency in prompts can influence clarity, specificity, and the model's understanding, potentially affecting the correctness and quality of generated code.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "25",
+      "question": "In design selection using GenAI concepts, which representation unexpectedly led to the best ability to select optimal designs?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Only numerical design performance data"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "Generative AI (GenAI) is increasingly used in design to explore and optimize solutions. Different representations of designs, such as images, text, or numerical vectors, can be fed into GenAI models to learn design spaces and predict optimal solutions.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "26",
+      "question": "What risk can standard visualizations introduce for MLLMs in network-bridge detection tasks?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Create a strong bias toward accepting/refuting a bridge regardless of truth"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Create a strong bias toward accepting/refuting a bridge regardless of truth"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Network-bridge detection identifies connections between different networks, crucial for security and management. Machine Learning Language Models (MLLMs) are increasingly used for this, leveraging their ability to analyze complex data. Visualizations aid human understanding but can inadvertently introduce biases or vulnerabilities when used as input for MLLMs.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "27",
+      "question": "What does G-TRACE quantify in the context of GenAI?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Training- and inference-related emissions across modalities and geographies"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Training- and inference-related emissions across modalities and geographies"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "G-TRACE is a metric used to evaluate the environmental impact of Generative AI models. It focuses on quantifying the carbon footprint associated with training, inference, and the entire lifecycle of these models, considering factors like energy consumption and hardware utilization.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "28",
+      "question": "What is the GENIUS project’s aim regarding GenAI in software engineering?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Advance AI integration across all SDLC phases, aligning technical innovation with business relevance"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Advance AI integration across all SDLC phases, aligning technical innovation with business relevance"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Generative AI (GenAI) models are rapidly evolving, showing promise in automating and improving various software engineering tasks. However, challenges remain in ensuring reliability, trustworthiness, and ethical use within the software development lifecycle. Research efforts are underway to explore and address these issues.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "29",
+      "question": "What is the paper’s position on using GenAI for qualitative coding methodologies?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Not methodologically valid; risks undermining robustness/trustworthiness"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "Qualitative coding traditionally relies on human interpretation to identify patterns and themes in text data. Methods include thematic analysis, grounded theory, and content analysis. Researchers develop codebooks, apply codes to data, and analyze inter-coder reliability to ensure consistency, a standard practice for rigor.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "30",
+      "question": "What market structure can lead to a lose-lose outcome in GenAI content procurement, per the paper?",
+      "predicted_letters": [
+        "A",
+        "C",
+        "D"
+      ],
+      "predicted": [
+        "Two-layer platform-creator",
+        "Perfect competition with no contracts",
+        "Three-layer market including data intermediaries with large pre-signed contracts"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Three-layer market including data intermediaries with large pre-signed contracts"
+      ],
+      "is_correct": 0,
+      "is_partial": 1,
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "f1": 0.5,
+      "background_text": "The paper likely discusses the economics of procuring content for Generative AI (GenAI) models. This involves acquiring data, text, images, etc., used to train these models. Different market structures influence the fairness and efficiency of this procurement process, affecting both content creators and AI developers.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "31",
+      "question": "Which bioinformatics areas are highlighted as benefiting from GenAI?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Genomics, proteomics, transcriptomics, structural biology, and drug discovery"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Genomics, proteomics, transcriptomics, structural biology, and drug discovery"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Bioinformatics applies computational tools to analyze biological data. GenAI (Generative AI) leverages machine learning models to generate new data, like protein sequences or drug candidates. Its potential impact on accelerating discoveries and improving efficiency in various bioinformatics fields is significant.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "32",
+      "question": "What is the core idea behind the proposed scalable meta-learning of interpretable models?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Generate synthetic near-optimal decision trees for pre-training (MetaTree)"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "The proposed method likely leverages techniques like gradient-based meta-learning (e.g., MAML) to learn initialization parameters. It aims to build interpretable models (e.g., linear models, decision trees) within the inner loop, encouraging sparsity or structural constraints. Scalability is likely achieved through efficient optimization strategies and distributed computing.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "33",
+      "question": "Why do the authors argue CS1 should assess problem decomposition in the GenAI era?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Students can generate large quantities of code; decomposition remains critical to design"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Students can generate large quantities of code; decomposition remains critical to design"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "CS1 courses traditionally introduce fundamental programming concepts. Problem decomposition, breaking down complex problems into smaller, manageable sub-problems, is a key skill for software development. Generative AI tools impact how code is created, potentially altering the skills needed for effective programming.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "34",
+      "question": "What problem does TalkSketch aim to mitigate in idea generation?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Text-only prompting disrupts creative flow; integrates sketch + speech for fluid ideation"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Text-only prompting disrupts creative flow; integrates sketch + speech for fluid ideation"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Human cognition often relies on internal monologue and mental imagery. Neural activity in the prefrontal cortex supports working memory and executive functions, crucial for idea generation. Dopamine pathways play a role in creative thinking and reward-driven exploration of novel concepts.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "35",
+      "question": "What bias pattern did the educational LLM benchmark reveal for gender counterfactuals?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Implicit manipulations induced larger semantic shifts for male-female than female-male"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Implicit manipulations induced larger semantic shifts for male-female than female-male"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Large language models (LLMs) are increasingly used in education. Benchmarks evaluate their fairness and accuracy. Counterfactual analysis, which involves changing specific attributes like gender in prompts, helps identify biases embedded within these models.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "36",
+      "question": "Which HMI aspect does the automotive GenAI review emphasize via a case study?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Voice-based HMI (e.g., MBUX Virtual Assistant) for more natural, proactive, personalized interactions"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Voice-based HMI (e.g., MBUX Virtual Assistant) for more natural, proactive, personalized interactions"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Automotive Human-Machine Interfaces (HMIs) are evolving rapidly, integrating advanced technologies like Generative AI (GenAI). Reviews analyze their effectiveness, focusing on safety, usability, and user experience. GenAI's potential to personalize interfaces and enhance driver assistance is a key area of evaluation.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "37",
+      "question": "What does the “Deception Decoder” framework aim to help users identify?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "AI-generated misinformation/disinformation across text, image, and video on social media"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "AI-generated misinformation/disinformation across text, image, and video on social media"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "The \"Deception Decoder\" framework, developed by researchers like Dr. Pamela Meyer, focuses on improving deception detection skills. It analyzes verbal and nonverbal cues, micro-expressions, and other behavioral indicators to help individuals identify potential lies and misleading statements.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "38",
+      "question": "What gap did the brownfield programming study find regarding GenAI coding assistants?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Improved performance (time, tests passed) without improved comprehension — a comprehension-performance gap"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Improved performance (time, tests passed) without improved comprehension — a comprehension-performance gap"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Brownfield programming involves modifying and extending existing software systems. Unlike greenfield projects starting from scratch, brownfield projects require understanding and integrating with legacy code, often posing unique challenges for developers.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "39",
+      "question": "What does the proposed Meta-GFlowNet enable in mobile wireless systems?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Rapid adaptation to dynamic conditions via model-agnostic meta-learning without labeled data"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Rapid adaptation to dynamic conditions via model-agnostic meta-learning without labeled data"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "GFlowNets are generative models that learn to sample diverse sets of candidates proportional to a reward function. They've shown promise in various fields, including drug discovery and materials science, by efficiently exploring complex solution spaces. Their application to wireless systems is a relatively new area of research.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "40",
+      "question": "What key shortcoming does the paper identify in the EU AI Act with respect to fairness?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Absence of quantifiable fairness metrics and ambiguity among transparency/explainability/interpretability"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Absence of quantifiable fairness metrics and ambiguity among transparency/explainability/interpretability"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "The EU AI Act is a proposed law aiming to regulate artificial intelligence within the European Union. It establishes rules for AI systems based on risk levels, focusing on safety and fundamental rights. The Act seeks to promote innovation while mitigating potential harms associated with AI.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "41",
+      "question": "What are the two core capabilities emphasized in Text-rich Image Understanding (TIU)?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Perception and Understanding"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Perception and Understanding"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Text-rich Image Understanding (TIU) is a field in computer vision focused on extracting comprehensive meaning from images that contain significant textual elements. This involves both understanding the visual content and interpreting the text present within the image to derive a richer, more informed understanding.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "42",
+      "question": "What distinguishes the post-LLM era of TIU models from earlier OCR-based methods?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Unified end-to-end sequence modeling with LLM-based attention mechanisms"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Unified end-to-end sequence modeling with LLM-based attention mechanisms"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Early Text In Image Understanding (TIU) relied on Optical Character Recognition (OCR) followed by rule-based or statistical methods for layout analysis and information extraction. Post-LLM TIU leverages large language models, enabling end-to-end learning, contextual understanding, and reasoning directly from images, surpassing OCR's limitations.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "43",
+      "question": "What is the main goal of AMoPO (Adaptive Multi-objective Preference Optimization)?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "To achieve dynamic balance across multiple preference dimensions without reward/reference models"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "To achieve dynamic balance across multiple preference dimensions without reward/reference models"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Multi-objective optimization involves finding the best solution when multiple conflicting objectives exist. Traditional methods often require pre-defined preferences. Adaptive Multi-objective Preference Optimization (AMoPO) aims to dynamically learn and incorporate user preferences during the optimization process to find solutions that better align with individual needs.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "44",
+      "question": "Which mechanism in AMoPO enables automatic dimension prioritization?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Adaptive weight assignment modeling the generation space as a Gaussian distribution"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Adaptive weight assignment modeling the generation space as a Gaussian distribution"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "AMoPO (Automated Mechanism Optimization with Pareto Optimization) is a framework for automatically tuning the parameters of optimization algorithms. It aims to find the best configuration of an algorithm for a given problem by exploring different parameter settings and evaluating their performance based on multiple objectives.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "45",
+      "question": "What problem does MERGE aim to solve in Generative Retrieval systems?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Improving semantic relevance by learning multi-level document identifiers through query bridging"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Improving semantic relevance by learning multi-level document identifiers through query bridging"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Generative retrieval combines retrieval and generation. Retrieval identifies relevant documents. Generation then synthesizes an answer from those documents. Key entities include a retriever (e.g., dense vector search) and a generator (e.g., large language model). The mechanism involves encoding queries/documents into embeddings and using attention mechanisms.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "46",
+      "question": "Which module in MERGE captures hierarchical semantic information?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Inner-level multi-relevance learning module"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Inner-level multi-relevance learning module"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "MERGE (Multimodal Entity Relationship Graph Embedding) is a model designed to represent entities and relationships from multiple data sources (text, images, etc.) in a unified embedding space. It aims to capture complex relationships between entities, improving tasks like knowledge graph completion.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "47",
+      "question": "What does the paper ‘Understanding the Dark Side of LLMs’ Intrinsic Self-Correction’ primarily reveal?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "That intrinsic self-correction can fail and introduce human-like bias and answer wavering"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "That intrinsic self-correction can fail and introduce human-like bias and answer wavering"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Large Language Models (LLMs) can generate fluent text but also exhibit biases, factual errors, and harmful outputs. Research explores methods to mitigate these issues, including self-correction, where LLMs attempt to improve their own responses. This paper investigates the limitations and potential drawbacks of this self-correction process.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "48",
+      "question": "Which strategy did the authors propose to alleviate self-correction failures?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Question repeating and light supervised fine-tuning with few samples"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Question repeating and light supervised fine-tuning with few samples"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Self-correction in large language models (LLMs) aims to improve accuracy by iteratively refining initial outputs. However, LLMs sometimes fail to correct errors or even introduce new ones. Research explores methods to enhance self-correction capabilities and mitigate these failures.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "49",
+      "question": "What core problem does LEAF address in traffic flow forecasting?",
+      "predicted_letters": [
+        "C",
+        "D"
+      ],
+      "predicted": [
+        "Dependence on static graphs",
+        "Inability of existing methods to adapt to test-time environmental changes"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Inability of existing methods to adapt to test-time environmental changes"
+      ],
+      "is_correct": 0,
+      "is_partial": 1,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.6666666666666666,
+      "background_text": "Traffic flow forecasting is crucial for intelligent transportation systems, enabling proactive traffic management and route optimization. Traditional methods often struggle with capturing complex spatial-temporal dependencies and handling dynamic traffic conditions, leading to inaccurate predictions and suboptimal system performance.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "50",
+      "question": "How does LEAF utilize LLMs within its architecture?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "To select and rank the most likely prediction between dual branches at test time"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "LEAF (Learning, Education, and Assessment Framework) is a decentralized AI platform focused on educational applications. It aims to personalize learning experiences, automate assessment, and provide educational resources through AI-powered tools. Its architecture likely leverages Large Language Models (LLMs) for various natural language processing tasks.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "51",
+      "question": "What is the primary contribution of FinMME benchmark?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "A comprehensive financial multimodal dataset for reasoning and evaluation across 18 domains and 6 asset classes"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "A comprehensive financial multimodal dataset for reasoning and evaluation across 18 domains and 6 asset classes"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "FinMME (Financial Macroeconomic Model Explorer) is a benchmark designed to evaluate the reasoning capabilities of large language models (LLMs) in finance and macroeconomics. It tests LLMs on tasks like forecasting, policy analysis, and understanding economic relationships using real-world data and scenarios.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "52",
+      "question": "What metric does FinMME introduce for unbiased model evaluation?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "FinScore"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "FinMME introduces the **Distribution Shift Score (DSS)**. It leverages adversarial training and optimal transport principles to quantify the distributional difference between training and evaluation data. This score guides model selection by prioritizing models robust to unseen data distributions, a standard practice for reliable generalization.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "53",
+      "question": "What innovation does Native Sparse Attention (NSA) bring to long-context modeling?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Dynamic hierarchical sparse strategy combining coarse compression and fine selection"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Dynamic hierarchical sparse strategy combining coarse compression and fine selection"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Traditional attention struggles with long sequences due to quadratic complexity. NSA addresses this by selectively attending to important tokens. It leverages learned sparsity patterns, allowing efficient computation and reduced memory footprint while maintaining performance on long-range dependencies, a standard challenge in sequence modeling.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "54",
+      "question": "What kind of speedup does NSA achieve over Full Attention models on 64k sequences?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Up to 11.6× speedup across decoding, forward and backward propagation"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Up to 11.6× speedup across decoding, forward and backward propagation"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Neural Sequence Alignment (NSA) employs dynamic programming to approximate attention mechanisms, offering faster computation and reduced memory usage compared to full attention. It leverages techniques like banded alignment and sparsity to accelerate processing, particularly beneficial for long sequences, while maintaining comparable accuracy.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "55",
+      "question": "What problem does the GCSE model aim to solve in unsupervised sentence embedding?",
+      "predicted_letters": [
+        "B"
+      ],
+      "predicted": [
+        "Need for supervised labels"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Low data diversity and high data noise in LLM-based augmentation"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "The GCSE model addresses the problem of semantic collapse in unsupervised sentence embedding. It employs contrastive learning, maximizing agreement between augmented views of the same sentence while minimizing agreement with other sentences. This encourages diverse and meaningful representations, improving downstream task performance.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "56",
+      "question": "How does the Gaussian-decayed function help in GCSE?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Reduces the impact of false hard negatives by down-weighting their gradients"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "The question explores the relevance of Gaussian-decayed functions, typically used in advanced mathematics and physics, to the General Certificate of Secondary Education (GCSE) level. GCSE focuses on foundational mathematical concepts, raising questions about this function's applicability within that curriculum.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "57",
+      "question": "What is the key architectural feature of LLaMA-Omni?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "End-to-end speech encoder–LLM–decoder architecture with low-latency speech interaction"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "End-to-end speech encoder–LLM–decoder architecture with low-latency speech interaction"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "LLaMA is a series of open-source large language models (LLMs) developed by Meta AI. They are known for their strong performance with relatively smaller parameter sizes. LLaMA-Omni is a multimodal version extending the LLaMA architecture to process and understand various input types beyond text.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "58",
+      "question": "What is the approximate response latency achieved by LLaMA-Omni?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "As low as 236 milliseconds"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "As low as 236 milliseconds"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "LLaMA-Omni is a multimodal large language model (MLLM) developed by Meta, designed to process and understand various input types, including text, images, and audio. It builds upon the LLaMA architecture and aims to provide a unified model for diverse tasks.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "59",
+      "question": "What main idea underpins LLaVA-Mini’s efficiency in multimodal modeling?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Reducing vision tokens to a single token through modality pre-fusion"
+      ],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "Reducing vision tokens to a single token through modality pre-fusion"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "LLaVA-Mini achieves efficiency through a two-stage training approach. First, it pre-trains a vision encoder (e.g., CLIP) and a large language model (LLM) separately. Then, it connects them with a lightweight linear projection layer, trained using instruction-following data. This avoids end-to-end training of the entire model.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "60",
+      "question": "How much FLOPs reduction does LLaVA-Mini achieve compared to LLaVA-v1.5?",
+      "predicted_letters": [
+        "N",
+        "K",
+        "O"
+      ],
+      "predicted": [],
+      "correct_letters": [
+        "D"
+      ],
+      "correct": [
+        "77 %"
+      ],
+      "is_correct": 0,
+      "is_partial": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "background_text": "LLaVA (Large Language and Vision Assistant) is a multimodal AI model combining a vision encoder with a large language model. Later versions aim to improve efficiency and reduce computational cost compared to earlier iterations while maintaining performance on visual question answering and related tasks.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "61",
+      "question": "In robotic manipulation, what innovation enables unsupervised grasp generation for irregular, tool-like objects?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Decoupling complex geometric computation via a Contact Field data-structure"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "High-performance procedural grasp synthesis",
+        "Decoupling complex geometric computation via a Contact Field data-structure"
+      ],
+      "is_correct": 0,
+      "is_partial": 1,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "background_text": "Living organisms are composed of cells, the fundamental units of life. DNA encodes genetic information, transcribed into RNA and translated into proteins. Proteins perform diverse functions, catalyzed by enzymes. These processes are regulated by complex feedback mechanisms and interactions within and between cells.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "62",
+      "question": "What approach allows robotic manipulation models to align input and output modalities for efficient training?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Input-Output alignment for efficient 3D manipulation learning with vision-language models",
+        "BitVLA / BridgeVLA framework"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "BitVLA / BridgeVLA framework",
+        "Input-Output alignment for efficient 3D manipulation learning with vision-language models"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Robotic manipulation models often use techniques like imitation learning or reinforcement learning. These methods align input (e.g., vision, proprioception) and output modalities (e.g., joint torques, end-effector poses) through loss functions that minimize discrepancies between predicted and desired actions, following established control theory and machine learning practices.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "63",
+      "question": "In multi-robot systems, what methodology supports very-large-scale task allocation in challenging environments?",
+      "predicted_letters": [
+        "E"
+      ],
+      "predicted": [
+        "Heterogeneous teams in challenging environments"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Heterogeneous teams in challenging environments",
+        "Robot redistribution strategy for very large-scale multi-robot task allocation"
+      ],
+      "is_correct": 0,
+      "is_partial": 1,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "background_text": "Auction-based methods are common. Robots bid on tasks based on cost functions considering factors like distance, resource needs, and environmental constraints. Market-clearing algorithms then assign tasks to optimize overall system performance, often using iterative or distributed approaches for scalability.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "64",
+      "question": "Which technique enables efficient visuomotor policy learning using frequency consistency constraints?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Flow-based visuomotor policy via frequency-consistency (FreqPolicy)",
+        "Efficient policy learning in robotics"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Efficient policy learning in robotics",
+        "Flow-based visuomotor policy via frequency-consistency (FreqPolicy)"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Visuomotor policy learning often uses deep neural networks trained with reinforcement learning. Techniques like behavior cloning or actor-critic methods are common. Frequency consistency leverages Fourier analysis to align the frequency spectrum of learned actions with expert demonstrations, improving policy generalization and stability.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "65",
+      "question": "What design enables a robot to learn lifelike whole-body locomotion and manipulation through “skill blending”?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "SkillBlender: blending multiple skills for versatile humanoid whole-body loco-manipulation",
+        "Humanoid versatile learning"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Humanoid versatile learning",
+        "SkillBlender: blending multiple skills for versatile humanoid whole-body loco-manipulation"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Robotics research aims to create robots capable of complex, adaptable movements. \"Skill blending\" allows robots to combine pre-programmed or learned skills to perform new tasks. This approach seeks to overcome limitations of traditional control methods by enabling more natural and efficient motion.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "66",
+      "question": "What method supports generating instance-level 3D scene graphs using LiDAR-camera fusion for robots?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Instance-Level 3D Scene Graphs via Room Prior Guided LiDAR-Camera Fusion (IRS)",
+        "Robust mapping for robotics"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Robust mapping for robotics",
+        "Instance-Level 3D Scene Graphs via Room Prior Guided LiDAR-Camera Fusion (IRS)"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "LiDAR and cameras provide complementary data. LiDAR offers accurate 3D point clouds, while cameras capture rich textures and semantics. Fusing these modalities leverages their strengths. Instance segmentation identifies objects, and 3D scene graphs represent objects and their relationships within the environment.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "67",
+      "question": "What approach enables zero-shot object navigation using a 3D voxel-based belief map?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "BeliefMapNav: 3D voxel-based belief map for zero-shot object navigation",
+        "Generalizable object navigation"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Generalizable object navigation",
+        "BeliefMapNav: 3D voxel-based belief map for zero-shot object navigation"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Object navigation tasks involve robots finding specific objects in an environment. Traditional methods require training for each object. Zero-shot navigation aims to achieve this without object-specific training, relying on semantic understanding and spatial reasoning.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "68",
+      "question": "What technique aids real-time adaptation to dynamic human intentions during collaboration with robots?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Hierarchical intention tracking with switching trees for real-time adaptation",
+        "Human-robot collaborative adaptation"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Human-robot collaborative adaptation",
+        "Hierarchical intention tracking with switching trees for real-time adaptation"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Techniques like Bayesian inference and Hidden Markov Models (HMMs) are employed to model human intent as a probability distribution. Reinforcement learning then optimizes robot actions based on predicted intent, enabling real-time adaptation. Common practice involves incorporating human feedback to refine these models.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "69",
+      "question": "What innovation supports end-to-end multimodal planning for autonomous driving via trajectory scoring?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Generalized trajectory scoring for end-to-end multimodal planning in driving",
+        "High-performing multimodal planning"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "High-performing multimodal planning",
+        "Generalized trajectory scoring for end-to-end multimodal planning in driving"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Autonomous driving requires planning safe and efficient routes. Multimodal planning considers multiple possible routes simultaneously. Trajectory scoring evaluates these routes based on factors like safety, comfort, and efficiency. Combining these allows autonomous vehicles to choose the best path from diverse options.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "70",
+      "question": "What platform design brings agility, squeezability and collision resilience together in quadrotor robotics?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Bioinspired soft quadrotors with agility, squeezability & collision resilience",
+        "Soft-robotics UAV innovation"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Soft-robotics UAV innovation",
+        "Bioinspired soft quadrotors with agility, squeezability & collision resilience"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Quadrotor robotics faces challenges in navigating complex environments. Traditional rigid designs can be brittle and prone to damage. Research explores novel platform designs to enhance agility for maneuvering, squeezability for navigating tight spaces, and collision resilience for robustness in unpredictable situations.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "71",
+      "question": "What enables a robot to form terrain-aware task-driven 3D scene graphs in outdoor environments?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Terrain-aware task-driven 3D scene graph generation in outdoor environments",
+        "Improved understanding of scenes for tasks"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Improved understanding of scenes for tasks",
+        "Terrain-aware task-driven 3D scene graph generation in outdoor environments"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "3D scene graphs represent environments as interconnected objects and their relationships. Robots use these graphs for navigation, manipulation, and task planning. Creating these graphs in complex, unstructured outdoor environments requires robust perception, terrain understanding, and task-specific knowledge to filter and prioritize relevant information.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "72",
+      "question": "Which approach enhances situational awareness in underwater robotics via multimodal spatial perception?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Enhancing situational awareness in underwater robotics with multimodal spatial perception",
+        "Multi-modal fusion for underwater robots"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Multi-modal fusion for underwater robots",
+        "Enhancing situational awareness in underwater robotics with multimodal spatial perception"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Underwater robotics faces challenges in situational awareness due to limited visibility and communication. Multimodal spatial perception integrates data from diverse sensors (e.g., sonar, cameras, inertial measurement units) to create a more comprehensive and reliable understanding of the robot's surroundings.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "73",
+      "question": "What low-cost open-source robot platform enables large-scale swarm robotics experiments?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Low-cost open-hardware robot platform for swarm robotics",
+        "Enables large-scale many-agent experiments"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Enables large-scale many-agent experiments",
+        "Low-cost open-hardware robot platform for swarm robotics"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Swarm robotics utilizes distributed control algorithms on many robots. Open-source platforms like ROS (Robot Operating System) facilitate communication and coordination. Low-cost hardware, often based on microcontrollers and sensors, enables large-scale deployments. Standard practices include using message passing and decentralized decision-making.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "74",
+      "question": "What method uses human-assisted policy refinement through action preference optimization in robotic learning?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Human-assisted robotic policy refinement via action-preference optimization",
+        "Interactive learning improvement"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Interactive learning improvement",
+        "Human-assisted robotic policy refinement via action-preference optimization"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Reinforcement learning from human feedback (RLHF) uses human preferences to shape robot behavior. Typically, humans compare robot action pairs, and these comparisons train a reward model. This reward model then guides policy optimization, often via reinforcement learning algorithms, to improve task performance.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "75",
+      "question": "What technique improves sim-to-real adaptation for point-cloud segmentation in industrial human-robot collaboration?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Sim2Real domain adaptation algorithm for point-cloud segmentation in industrial human-robot collaboration",
+        "Bridging simulation→real world"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Bridging simulation→real world",
+        "Sim2Real domain adaptation algorithm for point-cloud segmentation in industrial human-robot collaboration"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Domain adaptation techniques, like adversarial training and domain randomization, bridge the gap between simulated and real point cloud data. These methods minimize feature discrepancies and improve generalization by learning domain-invariant representations or augmenting simulation data with realistic variations, following standard machine learning practices.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "76",
+      "question": "What planner enforces multiple inequality constraints using learned signed distance fields in motion planning?",
+      "predicted_letters": [
+        "D"
+      ],
+      "predicted": [
+        "Barrier-Rate-guided MPPI (BR-MPPI) enforcing multiple inequality constraints with learned SDF"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Advanced motion planning",
+        "Barrier-Rate-guided MPPI (BR-MPPI) enforcing multiple inequality constraints with learned SDF"
+      ],
+      "is_correct": 0,
+      "is_partial": 1,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "background_text": "Motion planning involves finding a collision-free path for a robot. Traditional methods struggle with complex environments and high-dimensional spaces. Signed Distance Fields (SDFs) represent the distance to obstacles, enabling efficient collision checking and gradient-based optimization. Learning SDFs allows for representing complex environments from data.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "77",
+      "question": "What framework uses a neuro-symbolic approach for robot learning by incorporating Bayesian inverse physics?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Bayesian inverse physics for neuro-symbolic robot learning",
+        "Combining physics-based modelling and learning"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Combining physics-based modelling and learning",
+        "Bayesian inverse physics for neuro-symbolic robot learning"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Neuro-symbolic AI combines neural networks' learning capabilities with symbolic reasoning's structured knowledge representation. This allows for systems that can learn from data and reason with abstract concepts, improving interpretability and generalization compared to purely neural approaches.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "78",
+      "question": "What innovation enables autonomous prosthetic-hand control without biosignals using imitation learning?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Biosignals-free autonomous prosthetic hand control via imitation learning",
+        "Assistive robotics advancement"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Assistive robotics advancement",
+        "Biosignals-free autonomous prosthetic hand control via imitation learning"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Traditional prosthetic hands require biosignals (muscle activity) for control. This can be limiting and require extensive training. Researchers are exploring alternative methods like imitation learning, where the prosthesis learns to mimic human hand movements through observation, potentially enabling more intuitive and autonomous control.",
+      "background_confidence": 0.7
+    },
+    {
+      "question_no": "79",
+      "question": "What method optimizes a segmented varying-curved foot design for bipedal robot walking?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Ellipse-based segmented varying-curved foot design for biped robot walking",
+        "Foot-design optimisation for locomotion"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Foot-design optimisation for locomotion",
+        "Ellipse-based segmented varying-curved foot design for biped robot walking"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Optimization methods, like gradient descent or evolutionary algorithms, are used to tune parameters (segment lengths, curvature) of the foot. Principles of biomechanics and robot dynamics guide the process. Standard practice involves simulation environments to evaluate walking stability, energy efficiency, and robustness across terrains.",
+      "background_confidence": 0.7999999999999999
+    },
+    {
+      "question_no": "80",
+      "question": "What method achieves source-seeking for a wheeled robot using only differential wheeled experiments and no model of the field?",
+      "predicted_letters": [
+        "D",
+        "E"
+      ],
+      "predicted": [
+        "Model-Free real-time unicycle-based source-seeking with differential-wheeled experiments",
+        "Reactive navigation without explicit field model"
+      ],
+      "correct_letters": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "Reactive navigation without explicit field model",
+        "Model-Free real-time unicycle-based source-seeking with differential-wheeled experiments"
+      ],
+      "is_correct": 1,
+      "is_partial": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "background_text": "Extremum seeking control (ESC) uses periodic perturbations to estimate the gradient of an unknown field. A wheeled robot applies differential wheel speed variations, observing the resulting signal (e.g., signal strength). Demodulation extracts the gradient estimate, driving the robot towards the source extremum without an explicit field model.",
+      "background_confidence": 0.7
+    }
+  ]
+}
