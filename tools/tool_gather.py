@@ -1,85 +1,108 @@
 """
 PaperQA — Gather Evidence Tool
-Implements: MMR retrieval + Summary LLM + LLM-based scoring (1–10 relevance)
+Implements: MMR retrieval + optional chunk cleaning
 """
 import os
 import warnings
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 warnings.filterwarnings("ignore", message=".*tokenizers.*")
 
-from concurrent.futures import ThreadPoolExecutor
-import re
-import json
-import random
-import asyncio
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional
 import numpy as np
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
-from dotenv import load_dotenv
-
-# 加载 .env 文件（如果存在）
-load_dotenv()
-from paperqa.schemas import Chunk, Evidence
-from paperqa.settings import (
+from schemas import Chunk, Evidence
+from settings import (
     EVIDENCE_TOPK_CONTEXT,
     MMR_LAMBDA,
-    MMR_INITIAL_TOPK,
 )
+
+# Try to import BM25, install with: pip install rank-bm25
+try:
+    from rank_bm25 import BM25Okapi
+    BM25_AVAILABLE = True
+except ImportError:
+    BM25_AVAILABLE = False
 # ----------------------------------------------------
 # Retriever: use MMR to select diverse & relevant chunks
 # ----------------------------------------------------
 class Retriever:
-    def __init__(self, chunks: List[Chunk], lambda_param: float = MMR_LAMBDA, initial_topk: int = MMR_INITIAL_TOPK):
+    def __init__(self, chunks: List[Chunk], lambda_param: float = MMR_LAMBDA, use_bm25: bool = True, bm25_weight: float = 0.3):
+        """
+        Initialize Retriever
+        
+        Args:
+            chunks: List of chunks to search from
+            lambda_param: MMR lambda parameter (0-1), higher = more relevance, lower = more diversity
+            use_bm25: Whether to use BM25 for hybrid search (default True)
+            bm25_weight: Weight for BM25 score in hybrid relevance (0-1), semantic weight = 1 - bm25_weight
+        """
         self.chunks = chunks
         self.lambda_param = lambda_param
-        self.initial_topk = initial_topk  # 先做粗排，召回 top-N 个最相关的
+        self.use_bm25 = use_bm25 and BM25_AVAILABLE
+        self.bm25_weight = bm25_weight
         
-    def mmr_search(self, query_emb: np.ndarray, k: int = EVIDENCE_TOPK_CONTEXT) -> List[Chunk]:
+        # Initialize BM25 if available
+        if self.use_bm25:
+            # Tokenize chunks for BM25
+            self.tokenized_chunks = [chunk.text.lower().split() for chunk in self.chunks]
+            self.bm25 = BM25Okapi(self.tokenized_chunks)
+    
+    def mmr_search(self, query_emb: np.ndarray, query_text: str = "", k: int = EVIDENCE_TOPK_CONTEXT) -> List[Chunk]:
         """
         Return top-k diverse and relevant chunks using Maximal Marginal Relevance (MMR).
+        Optionally combines semantic search with BM25 for hybrid retrieval.
         
-        改进：两阶段检索
-        1. 粗排：先用相似度召回 top-N 个最相关的 chunks
-        2. 精排：在 top-N 上用 MMR 选择既相关又多样化的 k 个 chunks
+        Args:
+            query_emb: Query embedding vector
+            query_text: Original query text (for BM25, optional)
+            k: Number of chunks to return
         """
-        # Check that all chunks have embeddings (should be set in search.ingest())
         chunks_without_embedding = [c for c in self.chunks if c.embedding is None]
         if chunks_without_embedding:
             raise ValueError(f"{len(chunks_without_embedding)} chunks missing embeddings. "
                            "Embeddings should be generated in SearchTool.ingest().")
         
-        # Flatten query_emb if it's 2D
         if len(query_emb.shape) > 1:
             query_emb = query_emb.flatten()
         
-        # 计算所有 chunks 与查询的相似度
+        # Compute semantic similarity (cosine similarity)
         docs = np.stack([np.array(c.embedding) for c in self.chunks])
-        sim_to_query = np.dot(docs, query_emb) / (
-            np.linalg.norm(docs, axis=1) * np.linalg.norm(query_emb) + 1e-8  # 防止除零
+        semantic_scores = np.dot(docs, query_emb) / (
+            np.linalg.norm(docs, axis=1) * np.linalg.norm(query_emb) + 1e-8
         )
         
-        # 🔍 阶段1：粗排 - 先召回 top-N 个最相关的 chunks
-        # 确保 initial_topk 不超过总 chunks 数
-        actual_topk = min(self.initial_topk, len(self.chunks))
-        top_indices = np.argsort(sim_to_query)[::-1][:actual_topk]  # 按相似度降序排列
+        # Compute hybrid relevance score (semantic + BM25)
+        if self.use_bm25 and query_text:
+            # Get BM25 scores
+            query_tokens = query_text.lower().split()
+            bm25_scores = self.bm25.get_scores(query_tokens)
+            
+            # Normalize both scores to [0, 1]
+            semantic_norm = (semantic_scores - semantic_scores.min()) / (semantic_scores.max() - semantic_scores.min() + 1e-8)
+            bm25_norm = (bm25_scores - bm25_scores.min()) / (bm25_scores.max() - bm25_scores.min() + 1e-8)
+            
+            # Hybrid relevance: combine semantic and BM25
+            relevance_scores = (1 - self.bm25_weight) * semantic_norm + self.bm25_weight * bm25_norm
+        else:
+            # Use only semantic scores
+            relevance_scores = semantic_scores
         
-        # 只在 top-N 候选集上计算相似度矩阵（减少计算量）
-        candidate_docs = docs[top_indices]
-        candidate_sim_to_query = sim_to_query[top_indices]
-        candidate_sim_matrix = np.dot(candidate_docs, candidate_docs.T)
+        # Compute chunk-to-chunk similarity matrix (for diversity)
+        sim_matrix = np.dot(docs, docs.T)
         
-        # 🔍 阶段2：精排 - 在 top-N 上用 MMR 选择 k 个
-        selected, remaining = [], list(range(len(top_indices)))
-
+        # MMR selection
+        selected, remaining = [], list(range(len(self.chunks)))
+        
         while len(selected) < k and remaining:
             mmr_scores = []
             for i in remaining:
-                # 与查询的相关性
-                relevance = candidate_sim_to_query[i]
-                # 与已选文档的最大冗余度
-                redundancy = max([candidate_sim_matrix[i, j] for j in selected], default=0)
-                # MMR 分数：平衡相关性和多样性
+                # Relevance to query (hybrid: semantic + BM25)
+                relevance = relevance_scores[i]
+                # Maximum redundancy with already selected chunks
+                redundancy = max([sim_matrix[i, j] for j in selected], default=0)
+                # MMR score: balance relevance and diversity
                 score = self.lambda_param * relevance - (1 - self.lambda_param) * redundancy
                 mmr_scores.append(score)
             
@@ -89,170 +112,117 @@ class Retriever:
             next_idx = remaining[np.argmax(mmr_scores)]
             selected.append(next_idx)
             remaining.remove(next_idx)
-
-        # 返回原始 chunks（通过 top_indices 映射回去）
-        return [self.chunks[top_indices[i]] for i in selected]
-
-# ----------------------------------------------------
-# Summarizer: LLM summarization + LLM relevance scoring
-# ----------------------------------------------------
-class Summarizer:
-    def __init__(self, summary_model: str = "meta-llama/Llama-3.1-8B-Instruct:novita", score_model: str = "meta-llama/Llama-3.1-8B-Instruct:novita"):
-        # 使用 Hugging Face 路由器 API
-        self.client = OpenAI(
-            base_url="https://router.huggingface.co/v1",
-            api_key=os.environ.get("HF_TOKEN", ""),
-        )
-        self.score_model = score_model      # Llama 3.1 8B for scoring
-
-    def summarize_and_score(self, chunk: Chunk, question: str) -> Evidence:
-        """
-        Use unified prompt to get both summary and score in one response.
-        Uses Llama 3.1 8B for combined summary and scoring.
-        """
-        prompt = f"""Summarize the text below to help answer a question. Do not directly answer the question, instead summarize to give evidence to help answer the question. Reply 'Not applicable' if
-text is irrelevant. Use concise summary length. At the end of your response, provide a score from 1-10 on a newline indicating relevance to question. Do not explain your score.
-
-Excerpt from citation:
-{chunk.text}
-
-Question: {question}
-
-Relevant Information Summary:
-"""
-        response = self.client.chat.completions.create(
-            model=self.score_model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-        )
-        content = response.choices[0].message.content.strip()
         
-        # Parse summary and score from response
-        if "\n" in content:
-            *summary_lines, last_line = content.split("\n")
-            summary = "\n".join(summary_lines).strip()
-            # Extract score from last line
-            match = re.search(r"(\d+(\.\d+)?)", last_line)
-            score = float(match.group(1)) if match else None
-        else:
-            summary = content
-            score = None
-
-        return Evidence(chunk_id=chunk.chunk_id, summary=summary, score=score)
-
+        # Return selected chunks
+        return [self.chunks[i] for i in selected]
 
 # ----------------------------------------------------
-# GatherTool: orchestrates retrieval → summarize → score
+# GatherTool: orchestrates retrieval → clean chunks
 # ----------------------------------------------------
 class GatherTool:
-    def __init__(self, retriever: Retriever, summarizer: Summarizer, embedder: Optional[SentenceTransformer] = None):
+    def __init__(self, retriever: Retriever, embedder: Optional[SentenceTransformer] = None, 
+                 clean_model: str = "llama3.1:8b", use_cleaning: bool = True):
+        """
+        Initialize GatherTool
+        
+        Args:
+            retriever: MMR retriever
+            embedder: Embedding model
+            clean_model: LLM model for cleaning chunk text
+            use_cleaning: Whether to use LLM for cleaning chunk text (default True)
+        """
         self.retriever = retriever
-        self.summarizer = summarizer
-        self.embedder = embedder
-        if self.embedder is None:
-            self.embedder = SentenceTransformer("BAAI/bge-base-en")
+        self.embedder = embedder or SentenceTransformer("BAAI/bge-base-en")
+        self.use_cleaning = use_cleaning
+        
+        if self.use_cleaning:
+            self.client = OpenAI(
+                base_url="http://localhost:11434/v1",
+                api_key="ollama",
+            )
+            self.clean_model = clean_model
+        else:
+            self.client = None
+            self.clean_model = None
+    
+    def clean_chunk(self, chunk: Chunk) -> str:
+        """
+        Clean chunk text using LLM to remove formatting issues
+        
+        Args:
+            chunk: Original chunk
+            
+        Returns:
+            str: Cleaned text
+        """
+        prompt = f"""Fix the formatting of this text excerpt from a scientific paper. Remove line breaks and spacing issues, fix broken sentences, but keep ALL information exactly as it is.
+
+Text:
+{chunk.text}
+
+IMPORTANT: Return ONLY the cleaned text content. Do NOT add any explanations, prefixes like "Here is..." or other commentary. Just return the cleaned paragraph directly.
+
+Output:"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.clean_model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=2000,
+            )
+            cleaned = response.choices[0].message.content.strip()
+            return cleaned if cleaned else chunk.text
+        except Exception:
+            return chunk.text
 
     def gather(self, question: str, query_emb: Optional[np.ndarray] = None) -> List[Evidence]:
         """
-        1️⃣ Retrieve diverse chunks (MMR)
-        2️⃣ Summarize each chunk with LLM (1–10 scoring)
-        3️⃣ Sort by score
+        Retrieve top-K relevant chunks using MMR, optionally clean chunk text
+        
         Args:
             question: The question to answer
             query_emb: Optional pre-computed query embedding. If None, will generate from question.
+        
+        Returns:
+            List[Evidence]: List of evidence with chunk_id and similarity score
         """
         # Generate query embedding if not provided
         if query_emb is None:
             query_emb = self.embedder.encode([question], convert_to_numpy=True, normalize_embeddings=True)[0]
         
-        # Step 1 — MMR retrieval
-        chunks: List[Chunk] = self.retriever.mmr_search(query_emb, k=EVIDENCE_TOPK_CONTEXT)
- 
-        # Step 2 — Concurrent summarization + scoring
-        evidences: List[Evidence] = self._batch_summarize(chunks, question)
-
-        # Step 3 — Sort by score (filter out None scores first)
-        evidences = [e for e in evidences if e.score is not None]
-        evidences.sort(key=lambda e: e.score, reverse=True)
-        return evidences
-
-    def _batch_summarize(self, chunks: List[Chunk], question: str) -> List[Evidence]:
-        """Run summarization + scoring concurrently."""
-        from contextlib import redirect_stderr
-        from io import StringIO
+        # Step 1: MMR retrieval (with BM25 hybrid search if enabled)
+        chunks: List[Chunk] = self.retriever.mmr_search(query_emb, query_text=question, k=EVIDENCE_TOPK_CONTEXT)
         
-        evidences = []
-        # 临时重定向 stderr 以抑制 tokenizers 警告
-        stderr_buffer = StringIO()
-        with redirect_stderr(stderr_buffer):
+        # Step 2: Clean chunk text (if enabled, parallel processing)
+        if self.use_cleaning:
+            def clean_single_chunk(chunk_idx_chunk):
+                idx, chunk = chunk_idx_chunk
+                cleaned_text = self.clean_chunk(chunk)
+                return idx, cleaned_text
+            
             with ThreadPoolExecutor(max_workers=4) as executor:
-                futures = [executor.submit(self.summarizer.summarize_and_score, c, question) for c in chunks]
-                for f in futures:
-                    evidences.append(f.result())
+                futures = {executor.submit(clean_single_chunk, (i, chunk)): i 
+                          for i, chunk in enumerate(chunks)}
+                for future in as_completed(futures):
+                    idx, cleaned_text = future.result()
+                    chunks[idx].text = cleaned_text
+ 
+        # Step 3: Convert to Evidence objects (compute similarity scores)
+        evidences = []
+        for chunk in chunks:
+            chunk_emb = np.array(chunk.embedding)
+            similarity = np.dot(chunk_emb, query_emb) / (
+                np.linalg.norm(chunk_emb) * np.linalg.norm(query_emb) + 1e-8
+            )
+            evidences.append(Evidence(
+                chunk_id=chunk.chunk_id,
+                summary="",
+                score=float(similarity * 10)
+            ))
+        
+        # Sort by relevance score (descending)
+        evidences.sort(key=lambda x: x.score, reverse=True)
+        
         return evidences
 
-
-if __name__ == "__main__":
-    from paperqa.tools.tool_search import SearchTool
-    
-    async def test_gather_evidence():
-        try:
-            litqa_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "litqa-v0.jsonl")
-            with open(litqa_path, "r") as f:
-                samples = [json.loads(line) for line in f if line.strip()]
-            # 过滤掉没有 question 字段的行（如 canary 行）
-            samples = [s for s in samples if "question" in s]
-            if not samples:
-                print("❌ No valid questions found in litqa-v0.jsonl")
-                return
-            
-            # 随机选择一个问题
-            random.seed(123)  # 使用当前时间作为随机种子
-            sample = random.choice(samples)
-            question = sample["question"]
-            
-            print(f"\n🧪 Testing LitQA Question:\n{question}\n")
-            if "ideal" in sample:
-                print(f"📝 Ideal Answer: {sample['ideal']}\n")
-            
-            search_tool = SearchTool(None, None, None, None, None, None, None)
-            hits = await search_tool.smart_search(question, min_hits=3, max_rounds=2)
-            print(f"📚 Found {len(hits)} papers")
-            
-            chunks = await search_tool.ingest(hits)
-            print(f"📄 Generated {len(chunks)} chunks\n")
-            
-            if not chunks:
-                print("⚠️ No chunks available")
-                return
-            
-            retriever = Retriever(chunks)
-            summarizer = Summarizer(summary_model="meta-llama/Llama-3.1-8B-Instruct:novita", score_model="meta-llama/Llama-3.1-8B-Instruct:novita")
-            gather_tool = GatherTool(retriever, summarizer, embedder=search_tool.embedder)
-            
-            print("🔍 Gathering evidence...\n")
-            evidences = gather_tool.gather(question)
-            
-            print(f"✅ Collected {len(evidences)} evidences:\n")
-            # 创建 chunk_id 到 chunk 的映射，方便查看原文
-            chunk_dict = {chunk.chunk_id: chunk for chunk in chunks}
-            
-            for i, ev in enumerate(evidences[:10], 1):
-                print(f"[{i}] Score: {ev.score}/10")
-                print(f"    Chunk ID: {ev.chunk_id[:60]}...")
-                
-                # 显示原始 chunk 文本
-                if ev.chunk_id in chunk_dict:
-                    original_text = chunk_dict[ev.chunk_id].text[:-1].replace('\n', ' ')
-                    print(f"    Original Text: {original_text}...")
-            
-                print(f"    Summary: {ev.summary[:-1]}...")
-                
-                print()
-                
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            import traceback
-            traceback.print_exc()
-
-    asyncio.run(test_gather_evidence())

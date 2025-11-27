@@ -1,19 +1,19 @@
-# PAPERQA/tools/tool_search.py
+# paperqa/tools/tool_search.py
 import os
 import arxiv
 import requests
 import fitz
 import asyncio
 from typing import List
-from ..schemas import SearchHit, Chunk
-from ..settings import Settings 
+from schemas import SearchHit, Chunk
+from settings import CHUNK_SIZE, CHUNK_OVERLAP
 from sentence_transformers import SentenceTransformer
-import faiss
 import numpy as np
-from nltk.corpus import wordnet as wn
+import pickle
+import json
 
 # make sure cache folder exists
-os.makedirs("PaperQA/data/cache", exist_ok=True)
+os.makedirs("data/cache", exist_ok=True)
 
 
 class SearchTool:
@@ -22,98 +22,76 @@ class SearchTool:
         self.arxiv = arxiv_client
         self.pubmed = pubmed_client
         self.parser = parser
-        self.embedder = SentenceTransformer("BAAI/bge-base-en")  # ✅ load embedding model
-        self.index_dim = 768  # bge-base-en outputs 768-dim embeddings
-        self.indexer = faiss.IndexFlatL2(self.index_dim)  # ✅ simple FAISS index (L2 similarity)
+        self.embedder = SentenceTransformer("BAAI/bge-base-en")
         self.cache = cache
 
+    def _extract_keywords(self, question: str) -> str:
+        """
+        Extract key terms from question for better arXiv search.
+        Removes question words and extracts important technical terms.
+        Preserves original case (uppercase/lowercase) for proper nouns and acronyms.
+        """
+        import re
+        
+        # Remove question words (case-insensitive matching)
+        question_words = ['what', 'how', 'why', 'when', 'where', 'which', 'who', 'does', 'do', 'is', 'are', 'can', 'could', 'should', 'would', 'will', 'the', 'a', 'an', 'to', 'of', 'in', 'on', 'at', 'for', 'with', 'through', 'enables', 'enable', 'learn', 'learning']
+        question_words_set = set(w.lower() for w in question_words)
+        
+        # Remove quotes and special characters (preserve case)
+        text = question.replace('"', '').replace("'", '')
+        
+        # Split into words
+        words = re.findall(r'\b\w+\b', text)
+        
+        # Filter out question words (case-insensitive) and short words
+        keywords = [w for w in words if w.lower() not in question_words_set and len(w) > 3]
+        
+        # Join with OR for arXiv search (broader matching)
+        if keywords:
+            return ' OR '.join(keywords[:10])  # Limit to 10 keywords
+        else:
+            # Fallback: use original question
+            return question
+    
     async def search(self, question: str, year_hint: str | None = None) -> List[SearchHit]:
         """
         Main search entrypoint.
-        Expands queries, performs arXiv discovery, and reranks by semantic similarity.
-        Output: List[SearchHit] (unchanged)
+        Extracts keywords, performs arXiv discovery, and reranks by semantic similarity.
         """
-        # Step 1 — expand query if needed
-        variants = self._expand_queries(question, year_hint)
+        # Extract keywords for better search
+        query = self._extract_keywords(question)
+        if year_hint:
+            query = f"{query} {year_hint}"
+        
+        # Discover candidate papers
+        hits = await self._fanout_discovery([query])
 
-        # Step 2 — discover candidate papers
-        hits = await self._fanout_discovery(variants)
-
-        # Step 3 — rerank before returning
-        ranked_hits = self.rank_by_embedding(question, hits, top_k=5)
+        # Rerank by semantic similarity (using original question for better semantic matching)
+        ranked_hits = self.rank_by_embedding(question, hits, top_k=3)
 
         return ranked_hits
-    
-
-    def expand_query_terms(self, question: str, max_terms: int = 5) -> list:
-        """
-        Expand key terms in the user's query using WordNet synonyms.
-        - Extracts meaningful words from the question.
-        - For each word, finds up to 2 close synonyms.
-        - Returns a list of unique additional terms for reformulation.
-        """
-        words = [w for w in question.lower().split() if w.isalpha()]
-        related = set()
-
-        for w in words:
-            for syn in wn.synsets(w):
-                for lemma in syn.lemmas()[:2]:  # top 2 synonyms per word
-                    name = lemma.name().replace("_", " ")
-                    if name != w:
-                        related.add(name)
-
-        # return only the top few diverse related terms
-        return list(related)[:max_terms]
-
-    async def smart_search(
-        self,
-        question: str,
-        year_hint: str | None = None,
-        min_hits: int = 3,
-        max_rounds: int = 3
-    ):
-        """
-        🧠 Self-evaluating smart search loop (with WordNet expansion).
-        - Expands query terms dynamically using WordNet synonyms.
-        - Reformulates queries each round if too few papers are found.
-        - Deduplicates results by paper_id.
-        - Returns all unique SearchHit objects (silent version).
-        """
-        all_hits = []
-        seen_ids = set()
-
-        # Step 1: Generate initial reformulations using WordNet
-        reformulations = self.expand_query_terms(question)
-        if not reformulations:
-            reformulations = ["review", "overview", "case study"]  # fallback
-
-        # Step 2: Perform multiple rounds of search
-        for attempt in range(max_rounds):
-            # build a reformulated query
-            if attempt < len(reformulations):
-                query_variant = f"{question} {reformulations[attempt]}"
-            else:
-                query_variant = question  # fallback to original
-
-            # perform search
-            hits = await self.search(query_variant, year_hint)
-
-            # keep only new hits
-            new_hits = [h for h in hits if h.paper_id not in seen_ids]
-            for h in new_hits:
-                seen_ids.add(h.paper_id)
-                all_hits.append(h)
-
-            # stop condition
-            if len(all_hits) >= min_hits:
-                break
-
-        return all_hits
 
     
-    async def ingest(self, hits: List[SearchHit]) -> List[Chunk]:
+    async def ingest(self, hits: List[SearchHit], use_cache: bool = True) -> List[Chunk]:
+        """
+        Process PDFs and generate chunks + embeddings
+        
+        Args:
+            hits: List of search results
+            use_cache: Whether to use cache (default True)
+        """
+        # 生成缓存路径
+        cache_key = self.get_cache_key(hits)
+        chunks_cache_path = f"data/chunks_{cache_key}.pkl"
+        
+        # Check cache
+        if use_cache:
+            cached_chunks = self.load_chunks(chunks_cache_path)
+            if cached_chunks:
+                return cached_chunks
+        
         all_chunks: List[Chunk] = []
-        for hit in hits[:5]:  # limit 5 PDFs for testing
+        for idx, hit in enumerate(hits[:5], 1):  # limit 5 PDFs
             pdf_url = hit.urls.get("pdf")
             if not pdf_url:
                 continue
@@ -124,7 +102,6 @@ class SearchTool:
                 .replace("/", "_")
                 .replace(":", "_")
             )
-            
             
             pdf_path = self._download_pdf(pdf_url, safe_id)
             if not pdf_path:
@@ -137,32 +114,35 @@ class SearchTool:
             chunks = self._make_chunks(hit.paper_id, text)
             all_chunks.extend(chunks)
 
-        # ✅ embed chunks and index them
+        # Generate embeddings and index
         texts = [chunk.text for chunk in all_chunks]
         if texts:
-            embeddings = self.embedder.encode(texts, convert_to_numpy=True)
-
-            # Print a preview vector
-            print("\n[EMBEDDING PREVIEW]")
-            print(embeddings[0][:10])  # show first 10 numbers of first embedding
-
-            # ✅ add to FAISS index
-            self.indexer.add(embeddings)
-
-            self.save_faiss_index()
+            # Use larger batch_size to speed up embedding generation
+            embeddings = self.embedder.encode(
+                texts, 
+                convert_to_numpy=True, 
+                normalize_embeddings=True,
+                batch_size=32,  # Increase batch size for faster processing
+                show_progress_bar=True
+            )
+            
+            # Attach embeddings to chunks
+            for chunk, emb in zip(all_chunks, embeddings):
+                chunk.embedding = emb.tolist()
+            
+            # Save chunks to cache
+            if use_cache:
+                self.save_chunks(all_chunks, chunks_cache_path)
 
 
         return all_chunks
-
-    def _expand_queries(self, q: str, years: str | None) -> List[str]:
-        return [q if not years else f"{q} {years}"]
 
     async def _fanout_discovery(self, queries: List[str]) -> List[SearchHit]:
         temp_hits = []
         for query in queries:
             search = arxiv.Search(
                 query=query,
-                max_results=10,
+                max_results=20,
                 sort_by=arxiv.SortCriterion.Relevance
             )
             for result in search.results():
@@ -215,10 +195,6 @@ class SearchTool:
             hit.similarity = float(sim)
             ranked_hits.append(hit)
 
-        print("\n[Semantic Ranking Preview]")
-        for i, h in enumerate(ranked_hits):
-            print(f"  {i+1}. {h.title[:80]}...  (similarity={h.similarity:.4f})")
-
         return ranked_hits
 
 
@@ -228,7 +204,7 @@ class SearchTool:
         and cache it locally. Returns the local file path if successful,
         else an empty string.
         """
-        pdf_dir = os.path.join("PaperQA", "data", "cache")
+        pdf_dir = os.path.join("data", "cache")
         os.makedirs(pdf_dir, exist_ok=True)
         pdf_path = os.path.join(pdf_dir, f"{paper_id}.pdf")
 
@@ -257,9 +233,39 @@ class SearchTool:
     def _pdf_to_text(self, pdf_path: str) -> str:
         try:
             with fitz.open(pdf_path) as doc:
-                return "".join(page.get_text("text") for page in doc)
+                full_text = "".join(page.get_text("text") for page in doc)
+                # 过滤掉 References 部分
+                return self._remove_references(full_text)
         except:
             return ""
+    
+    def _remove_references(self, text: str) -> str:
+        """
+        Remove References/Bibliography section from paper text
+        """
+        if not text:
+            return text
+        
+        ref_markers = [
+            "\nReferences\n",
+            "\nREFERENCES\n",
+            "\nBibliography\n",
+            "\nBIBLIOGRAPHY\n",
+            "\nReferences",
+            "\nREFERENCES",
+        ]
+        
+        ref_start = -1
+        for marker in ref_markers:
+            pos = text.find(marker)
+            if pos != -1 and (ref_start == -1 or pos < ref_start):
+                ref_start = pos
+        
+        # If References found, truncate text
+        if ref_start != -1:
+            return text[:ref_start]
+        
+        return text
 
     def _make_chunks(self, paper_id: str, text: str) -> List[Chunk]:
         if not text:
@@ -267,8 +273,14 @@ class SearchTool:
         chunks = []
         start = 0
         idx = 0
-        while start < len(text):
-            end = start + Settings.CHUNK_SIZE
+        # 如果 CHUNK_OVERLAP 是比例（0-1），转换为字符数；否则直接使用
+        overlap_chars = int(CHUNK_SIZE * CHUNK_OVERLAP) if CHUNK_OVERLAP < 1 else int(CHUNK_OVERLAP)
+        
+        text_len = len(text)
+        step_size = CHUNK_SIZE - overlap_chars
+        
+        while start < text_len:
+            end = min(start + CHUNK_SIZE, text_len)
             chunks.append(
                 Chunk(
                     paper_id=paper_id,
@@ -279,75 +291,84 @@ class SearchTool:
                 )
             )
             idx += 1
-            start = end - Settings.CHUNK_OVERLAP
+            
+            if end >= text_len:
+                break
+            
+            start = end - overlap_chars
+            if start >= end:
+                start = end
+        
         return chunks
 
-    def save_faiss_index(self, path="PaperQA/data/faiss.index"):
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        faiss.write_index(self.indexer, path)
-        print(f"[FAISS] Index saved to {path}")
-
-    def load_faiss_index(self, path="PaperQA/data/faiss.index"):
+    def save_chunks(self, chunks: List[Chunk], path="data/chunks.pkl"):
+        """Save chunks (including embeddings) to file using JSON"""
+        json_path = path.replace(".pkl", ".json")
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+        chunks_data = [chunk.model_dump() for chunk in chunks]
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(chunks_data, f, ensure_ascii=False, indent=2)
+    
+    def load_chunks(self, path="data/chunks.pkl") -> List[Chunk]:
+        """Load chunks (including embeddings) from file using JSON"""
+        # Try JSON format first
+        json_path = path.replace(".pkl", ".json")
+        
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, "r", encoding="utf-8") as f:
+                    chunks_data = json.load(f)
+                # Reconstruct Chunk objects from dictionaries
+                chunks = [Chunk.model_validate(chunk_dict) for chunk_dict in chunks_data]
+                if chunks and len(chunks) > 0:
+                    return chunks
+                return []
+            except (json.JSONDecodeError, Exception) as e:
+                try:
+                    os.remove(json_path)
+                except:
+                    pass
+                return []
+        
+        # Fallback: try old pickle format for backward compatibility
         if os.path.exists(path):
-            self.indexer = faiss.read_index(path)
-            print(f"[FAISS] Index loaded from {path}")
-        else:
-            print(f"[FAISS] No existing index found at {path}")
+            try:
+                with open(path, "rb") as f:
+                    chunks = pickle.load(f)
+                if chunks and len(chunks) > 0:
+                    self.save_chunks(chunks, path)  # Convert to JSON
+                    return chunks
+                return []
+            except (EOFError, pickle.UnpicklingError, Exception) as e:
+                try:
+                    os.remove(path)
+                except:
+                    pass
+                return []
+        
+        return []
+    
+    def get_cache_key(self, hits: List[SearchHit]) -> str:
+        """
+        生成缓存键：基于 paper_id 列表
+        
+        提取 arXiv ID 或使用完整 paper_id（避免截断导致冲突）
+        """
+        cache_parts = []
+        for hit in hits[:5]:
+            paper_id = hit.paper_id
+            
+            # 提取 arXiv ID（如果是 arXiv 论文）
+            if "arxiv.org/abs/" in paper_id:
+                # 提取 arXiv ID (e.g., "2405.21075")
+                arxiv_id = paper_id.split("/abs/")[-1].strip()
+                cache_parts.append(f"arxiv_{arxiv_id}")
+            else:
+                # 其他类型的 paper_id，安全处理
+                safe_id = paper_id.replace("http://", "").replace("https://", "")
+                safe_id = safe_id.replace("/", "_").replace(":", "_")
+                # 限制长度但保留足够信息（取前50个字符）
+                cache_parts.append(safe_id[:50])
+        
+        return "_".join(sorted(cache_parts))
 
-    def inspect_faiss(self, k: int = 3):
-        """Simple FAISS self-test: loads index, runs a dummy search."""
-        try:
-            # Load saved index
-            self.load_faiss_index()
-
-            print("\n[FAISS] ✅ Index status")
-            print(f" - Stored vectors: {self.indexer.ntotal}")
-            print(f" - Vector dimension: {self.indexer.d}")
-
-            if self.indexer.ntotal == 0:
-                print(" - ⚠️ Index is empty. Run ingest() first.")
-                return
-
-            # Create a random query to test search
-            import numpy as np
-            dummy_query = np.random.random((1, self.indexer.d)).astype("float32")
-            distances, ids = self.indexer.search(dummy_query, k)
-
-            print(f" - 🔎 Test query returned {len(ids[0])} nearest neighbors")
-            print(f" - Vector IDs: {ids[0]}")
-        except Exception as e:
-            print(f"[FAISS] ❌ Error inspecting FAISS index: {e}")
-
-if __name__ == "__main__":
-    import nltk
-    import asyncio
-    nltk.download("wordnet", quiet=True)
-
-    async def test_custom():
-        tool = SearchTool(None, None, None, None, None, None, None)
-        question = "What is the central idea behind the VideoTree framework for LLM video reasoning?"
-
-        # 🧠 WordNet expansions
-        related = tool.expand_query_terms(question)
-        print(f"\n🧠 WordNet expansions used for SmartSearch:\n   {related if related else '(no expansion found)'}")
-
-        # ✅ Run SmartSearch
-        hits = await tool.smart_search(question)
-        print(f"\n🧪 Testing Custom Question:\n{question}")
-
-        # 🔍 Print top-ranked semantic results (from _fanout_discovery or ranking)
-        print("\n[Semantic Ranking Preview]")
-        for i, h in enumerate(hits[:5]):
-            title_snippet = h.title[:70] + "..." if len(h.title) > 70 else h.title
-            similarity = getattr(h, "similarity", 0.0)
-            print(f"  {i+1}. {title_snippet}  (similarity={similarity:.4f})")
-
-        # 📄 Extract and chunk papers
-        chunks = await tool.ingest(hits)
-
-        # 🧩 Summary of outputs for next stage
-        print(f"\n📚 SearchHit count: {len(hits)}")
-        print(f"📄 Chunk count: {len(chunks)}")
-
-    asyncio.run(test_custom())

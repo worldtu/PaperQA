@@ -1,157 +1,152 @@
 """
-Person D — Answer LLM (reduce + citations)
+Answer LLM Tool
 Generates final answers based on evidence and background.
 """
 
 import ast
-import logging
-from typing import List, Tuple, Optional
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from langchain_core.documents import Document
-
-from schemas import Evidence, Background, Answer, Config
-from settings import Settings
-
-logger = logging.getLogger(__name__)
+import json
+from typing import List
+from openai import OpenAI
+from schemas import Chunk, Answer
 
 
 class AnswerLLMTool:
     """Tool for generating final answers using LLM."""
     
-    def __init__(self, config: Optional[Config] = None):
-        self.config = config or Settings.get_config()
-        self.tokenizer = None
-        self.model = None
+    def __init__(self, model: str = "llama3.1:8b", temperature: float = 0.3):
+        self.model = model
+        self.temperature = temperature
         self._initialize_model()
     
     def _initialize_model(self) -> None:
-        """Initialize the LLM model and tokenizer."""
-        self.tokenizer = AutoTokenizer.from_pretrained(Settings.MODEL_NAME)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            Settings.MODEL_NAME, 
-            dtype='auto', 
-            device_map='auto'
+        """Initialize the Ollama client."""
+        self.client = OpenAI(
+            base_url="http://localhost:11434/v1",
+            api_key="ollama",
         )
     
-    def answer(self, evidence_list: List[Evidence], background: Background, 
-              documents: List[Document], question: str, 
-              if_debug: bool = False) -> Answer:
+    def answer(self, question: str, context_chunks: List[Chunk], 
+              background: str) -> Answer:
         """
-        Generate final answer based on evidence and background.
+        Generate final answer based on context chunks and background.
         
         Args:
-            evidence_list: List of Evidence objects
-            background: Background information
-            documents: List of Document objects for context
             question: Original question
-            if_debug: Whether to print debug information
+            context_chunks: List of Chunk objects for context
+            background: Background information (string)
             
         Returns:
             Answer object with answers, sources, and confidence
         """
-        # Build context from top evidence
+        # Build context from chunks
         context = ""
         sources = []
         
-        for i, evidence in enumerate[Evidence](evidence_list[:self.config.top_chunk_num]):
-            if i < len(documents):
-                doc = documents[i]
-                citation = f"Source: {doc.metadata.get('source', 'Unknown')}, Page {str(doc.metadata.get('page', 'Unknown'))}"
-                context += f"\n\n{citation}\n" + doc.page_content
-                sources.append(citation)
+        for i, chunk in enumerate(context_chunks[:8], 1):  # Top-8 chunks
+            citation = f"[{i}] {chunk.paper_id}"
+            context += f"\n\n{citation}\n{chunk.text}"
+            sources.append(citation)
         
-        answer_prompt = Settings.SYSTEM_PROMPT_LLM + f"""
-        Write an answer (answer_length={self.config.answer_length}) for the question below based on the provided context. If the context provides insufficient information, reply 'I cannot answer'. For each part of your answer, indicate which sources most support it via valid citation markers at the end of sentences. Answer in an unbiased, comprehensive, and scholarly tone. If the question is subjective, provide an opinionated answer in the concluding 1-2 sentences.
-        Answer in the following format:
-            {{
-                "Answers": [Select multiple-choice options as answers],
-                "Sources": [Should be a list of sources, remain the format],
-                "Confidence": [0.0-1.0]
-            }}
+        answer_prompt = f"""You are a scientific question answering system. Based on the context provided, answer the question and return your response as a JSON object.
 
-        Context: {context}
+Context:
+{context}
 
-        Extra background information (might be wrong): {background.background_text}
+Background: {background}
 
-        Question: {question}
+Question: {question}
 
-        Answer:
-        """
+Your response MUST be a valid JSON object with exactly this structure:
+{{
+    "Answers": ["write your complete answer here with citation markers [1] [2] etc"],
+    "Sources": [1, 2, 3],
+    "Confidence": 0.85
+}}
 
-        messages = [{"role": "user", "content": answer_prompt}]
+Rules:
+- Use citation markers like [1], [2] to reference sources
+- Sources should be a list of numbers (e.g., [1, 2, 3])
+- Confidence is a number between 0.0 and 1.0
+- If you cannot answer, put "I cannot answer" in Answers
+- Return ONLY the JSON object above, no explanations before or after
 
-        text = self.tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True
-        )
-        model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
-        
-        # Generate response
-        generated_ids = self.model.generate(
-            **model_inputs,
-            max_new_tokens=Settings.MAX_NEW_TOKENS,
-            temperature=self.config.temperature,
-            top_p=self.config.top_p,
-            top_k=self.config.top_k,
-            min_p=self.config.min_p,
-        )
-        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
-        
-        # Parse thinking content
+JSON response:"""
+
+        # Call Ollama API
         try:
-            # Find </think> token (151668) - last occurrence from the end
-            reversed_index = output_ids[::-1].index(151668)
-            index = len(output_ids) - 1 - reversed_index
-        except ValueError:
-            index = 0
-
-        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip()
-        # Skip the </think> token itself (index + 1)
-        content = self.tokenizer.decode(output_ids[index + 1:], skip_special_tokens=True).strip()
-        
-        if if_debug:
-            logger.debug("Answer thinking content:\n" + thinking_content)
-            logger.debug("Answer content:\n" + content)
-            logger.debug(f"Content length: {len(content)}")
-            logger.debug(f"Content repr: {repr(content[:100])}")
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": answer_prompt}],
+                temperature=self.temperature,
+                max_tokens=800,
+            )
+            
+            content = response.choices[0].message.content.strip()
+            
+            # Extract JSON if LLM added extra text
+            if not content.startswith('{'):
+                start_idx = content.find('{')
+                end_idx = content.rfind('}')
+                if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                    content = content[start_idx:end_idx+1]
+                
+        except Exception as e:
+            return Answer(
+                text="I cannot answer due to API error",
+                citations=[],
+                confidence=0.0,
+                need_more=True
+            )
         
         try:
-            import json
             # Parse JSON response - try json.loads first, then ast.literal_eval as fallback
             try:
                 content_json = json.loads(content)
             except (ValueError, json.JSONDecodeError):
-                content_json = ast.literal_eval(content)
+                try:
+                    content_json = ast.literal_eval(content)
+                except Exception:
+                    # If JSON parsing fails, return error answer
+                    return Answer(
+                        text="I cannot answer",
+                        citations=[],
+                        confidence=0.0,
+                        need_more=True
+                    )
             
-            answers = content_json.get("Answers", [])
-            answer_sources = content_json.get("Sources", sources)
-            confidence = content_json.get("Confidence", 0.0)
+            # Extract answer content
+            answers_list = content_json.get("Answers", [])
+            answer_text = " ".join(answers_list) if isinstance(answers_list, list) else str(answers_list)
+            
+            # Extract citations and confidence
+            raw_sources = content_json.get("Sources", sources)
+            answer_citations = []
+            if isinstance(raw_sources, list):
+                for src in raw_sources:
+                    if isinstance(src, int):
+                        if 1 <= src <= len(sources):
+                            answer_citations.append(sources[src - 1])
+                        else:
+                            answer_citations.append(f"[{src}]")
+                    else:
+                        answer_citations.append(str(src))
+            else:
+                answer_citations = sources
+            
+            confidence = float(content_json.get("Confidence", 0.0))
+            need_more = confidence < 0.7 or len(answer_citations) == 0
             
             return Answer(
-                answers=answers,
-                sources=answer_sources,
-                confidence=confidence
+                text=answer_text,
+                citations=answer_citations,
+                confidence=confidence,
+                need_more=need_more
             )
             
-        except (ValueError, SyntaxError, Exception) as e:
-            if if_debug:
-                logger.debug(f"Error parsing answer response: {e}")
-            
-            # Fallback response
+        except Exception:
             return Answer(
-                answers=["I cannot answer"],
-                sources=[],
-                confidence=0.0
+                text="I cannot answer",
+                citations=[],
+                confidence=0.0,
+                need_more=True
             )
-
-
-# # How to use
-# config = Settings.get_config()
-# answer_tool = AnswerLLMTool(config)
-# answer = answer_tool.answer(
-#             evidence_list, 
-#             background, 
-#             documents, 
-#             question
-#         )
